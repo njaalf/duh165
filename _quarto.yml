@@ -1,19 +1,34 @@
 project:
   type: website
+  output-dir: docs
 
 website:
-  title: "hjemmeside"
-  navbar:
-    left:
-      - href: index.qmd
-        text: Home
-      - about.qmd
+  page-navigation: true
+  title: "Duh 165 Applied Statistics - Friday lecture"
+  site-url: "https://njaalf.github.io/duh165/"
 
+  sidebar:
+      background: "#D9E3E4"
+      logo: "images/icon.png"
+      pinned: true
+      align: center
+      style: "docked"
+      search: false
+      collapse-level: 1
+      contents:
+        - section: "Data"
+          contents: 
+            - href: data/smartphone_wellbeing.rds
+              text: wellbeing data
 format:
-  html:
-    theme: cosmo
-    css: styles.css
-    toc: true
+      html:
+        theme:
+          light: [cosmo, theme.scss]
+          dark: [cosmo, theme-dark.scss]
+        mainfont: "Atkinson Hyperlegible"
+        code-copy: true
+        code-overflow: wrap
+        toc: false
 
 editor: visual
 
