@@ -1,0 +1,96 @@
+---
+title: "Exercise: real-world growth curves"
+title-slide-attributes:
+    data-background-image: missplot.png
+    data-background-size: stretch
+    data-background-opacity: "0.5"
+    
+format: 
+  revealjs
+editor: source
+execute: 
+  echo: true
+  message: false
+  warning: false
+---
+
+```{r, echo=F}
+library(tidyverse)
+theme_set(theme_minimal())
+
+```
+
+## Studying reading and motivational development in two risk groups
+
+-   sample downloadable from homepage (left margin) of elementary school children through grades 1-3
+-   Two outcome measures: se (self-efficacy) and lf (listening comprehension)
+-   Two groups of children (variable dlf)
+    -   PoorD = "Poor decoders, ok comprehension"
+    -   PoorC = "Poor comprehension, ok decoding"
+
+Read data (uses the compact R file format .rds )
+
+```{r}
+library(lavaan); library(tidyverse)
+mydata <- readRDS("../data/growth_reading.rds")
+head(mydata)
+```
+
+## Inspecting data: descriptives
+
+```{r}
+library(gtsummary)
+mydata %>% tbl_summary(by = dlf, missing_text="missing",
+              statistic = list(all_continuous() ~ "{mean} ({sd})")) 
+```
+
+## Missing data!
+
+```{r}
+library(naniar) # visualize missingness
+vis_miss(mydata)
+```
+
+Missing data can be categorized into three main types: **MCAR**, **MAR**, and **MNAR**.
+
+## Missing Completely at Random (MCAR)
+
+When data are MCAR, missingness is unrelated to both observed and unobserved data, meaning no systematic differences exist between those with and without missing values.
+
+**Example:** Lab samples are lost due to a processing error. MCAR reduces sample size but does not introduce bias. However, it is a strong and often unrealistic assumption.
+
+## Missing at Random (MAR)
+
+When data are MAR, missingness depends on observed data but not on the missing values themselves.
+
+**Example:** In a depression study, men may be less likely to complete a survey, but missingness is unrelated to depression severity. Complete case analysis may be biased, but adjusting for observed factors (e.g., sex) can correct this.
+
+The *fiml* estimator in lavaan is commonly used to handle missingness, under the assumption of R. Full-information means that we do not throw away any data points. Using the default estimator means listwise deletion.
+
+## Missing Not at Random (MNAR)
+
+When data are MNAR, missingness is related to unobserved data, meaning the reason for missing data is itself unknown.
+
+**Example:** People with severe depression may be less likely to complete a survey. Because the cause of missingness is unmeasured, bias is likely and difficult to correct.
+
+## Exercises 
+
+1.  find the correlation matrix for se1-se2-se3 ? hint: *cor()*
+
+2.  find the correlation between lf1 and se1? interpret the sign and magnitude
+
+3.  what is the effect of *dlf* on *lf1*? hint: use *lm()*. interpret the estimates
+
+4.  make a spagettiplot of 25 random students for the growth in *se*
+
+5.  estimate a linear growth model (without covariates) for *lf*.
+
+6.  What is the model fit of the growth model? hint: use *fitmeasures()*
+
+7.  As in (5) but use *estimator="fiml"* to handle missingness. Do the substantive conclusions change?
+
+8.  Make histograms for the *lf* variables. Do the data appear normally distributed?
+
+9.  Run the model with covariates: use dlf as predictor for slope and intercept. Interpret the effect of the predictor
+
+10. plot the path diagram of model from exc. 9.

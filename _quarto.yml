@@ -10,16 +10,18 @@ website:
   sidebar:
       background: "#D9E3E4"
       logo: "images/icon.png"
-      pinned: true
       align: center
       style: "docked"
       search: false
       collapse-level: 1
       contents:
-        - section: "Data"
+        - section: "Data and papers"
           contents: 
             - href: data/smartphone_wellbeing.rds
               text: wellbeing data
+              contents: 
+            - href: data/lundberg.pdf
+              text: paper on causal estimands
 format:
       html:
         theme:

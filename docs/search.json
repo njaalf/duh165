@@ -7,10 +7,367 @@
     "text": "About this site\n\n1 + 1\n\n[1] 2"
   },
   {
+    "objectID": "slides/growth_exercise.html#studying-reading-and-motivational-development-in-two-risk-groups",
+    "href": "slides/growth_exercise.html#studying-reading-and-motivational-development-in-two-risk-groups",
+    "title": "Exercise: real-world growth curves",
+    "section": "Studying reading and motivational development in two risk groups",
+    "text": "Studying reading and motivational development in two risk groups\n\nsample downloadable from homepage (left margin) of elementary school children through grades 1-3\nTwo outcome measures: se (self-efficacy) and lf (listening comprehension)\nTwo groups of children (variable dlf)\n\nPoorD = “Poor decoders, ok comprehension”\nPoorC = “Poor comprehension, ok decoding”\n\n\nRead data (uses the compact R file format .rds )\n\nlibrary(lavaan); library(tidyverse)\nmydata &lt;- readRDS(\"../data/growth_reading.rds\")\nhead(mydata)\n\n# A tibble: 6 × 7\n    lf1   lf2   lf3   se1   se2   se3 dlf  \n  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;fct&gt;\n1     6     5    16    24    21    22 PoorC\n2     9    23    20    18    19    19 PoorC\n3    10    13    17    18    20    21 PoorD\n4    10    21    22    25    23    19 PoorC\n5     3     1     4    25    14    16 PoorD\n6     4     4     9    10    17     9 PoorD"
+  },
+  {
+    "objectID": "slides/growth_exercise.html#inspecting-data-descriptives",
+    "href": "slides/growth_exercise.html#inspecting-data-descriptives",
+    "title": "Exercise: real-world growth curves",
+    "section": "Inspecting data: descriptives",
+    "text": "Inspecting data: descriptives\n\nlibrary(gtsummary)\nmydata %&gt;% tbl_summary(by = dlf, missing_text=\"missing\",\n              statistic = list(all_continuous() ~ \"{mean} ({sd})\")) \n\n\n\n\n\n\n\n\n\n\n\n\nCharacteristic\nPoorD N = 6451\nPoorC N = 5601\n\n\n\n\nlf1\n7.36 (2.93)\n9.42 (1.22)\n\n\n    missing\n3\n0\n\n\nlf2\n11.6 (5.0)\n12.8 (4.5)\n\n\n    missing\n36\n31\n\n\nlf3\n15.8 (5.3)\n16.6 (5.1)\n\n\n    missing\n55\n49\n\n\nse1\n18.3 (3.6)\n20.4 (2.9)\n\n\nse2\n17.95 (2.88)\n19.52 (2.52)\n\n\n    missing\n33\n29\n\n\nse3\n17.71 (2.79)\n19.16 (2.57)\n\n\n    missing\n50\n47\n\n\n\n1 Mean (SD)"
+  },
+  {
+    "objectID": "slides/growth_exercise.html#missing-data",
+    "href": "slides/growth_exercise.html#missing-data",
+    "title": "Exercise: real-world growth curves",
+    "section": "Missing data!",
+    "text": "Missing data!\n\nlibrary(naniar) # visualize missingness\nvis_miss(mydata)\n\n\nMissing data can be categorized into three main types: MCAR, MAR, and MNAR."
+  },
+  {
+    "objectID": "slides/growth_exercise.html#missing-completely-at-random-mcar",
+    "href": "slides/growth_exercise.html#missing-completely-at-random-mcar",
+    "title": "Exercise: real-world growth curves",
+    "section": "Missing Completely at Random (MCAR)",
+    "text": "Missing Completely at Random (MCAR)\nWhen data are MCAR, missingness is unrelated to both observed and unobserved data, meaning no systematic differences exist between those with and without missing values.\nExample: Lab samples are lost due to a processing error. MCAR reduces sample size but does not introduce bias. However, it is a strong and often unrealistic assumption."
+  },
+  {
+    "objectID": "slides/growth_exercise.html#missing-at-random-mar",
+    "href": "slides/growth_exercise.html#missing-at-random-mar",
+    "title": "Exercise: real-world growth curves",
+    "section": "Missing at Random (MAR)",
+    "text": "Missing at Random (MAR)\nWhen data are MAR, missingness depends on observed data but not on the missing values themselves.\nExample: In a depression study, men may be less likely to complete a survey, but missingness is unrelated to depression severity. Complete case analysis may be biased, but adjusting for observed factors (e.g., sex) can correct this.\nThe fiml estimator in lavaan is commonly used to handle missingness, under the assumption of R. Full-information means that we do not throw away any data points. Using the default estimator means listwise deletion."
+  },
+  {
+    "objectID": "slides/growth_exercise.html#missing-not-at-random-mnar",
+    "href": "slides/growth_exercise.html#missing-not-at-random-mnar",
+    "title": "Exercise: real-world growth curves",
+    "section": "Missing Not at Random (MNAR)",
+    "text": "Missing Not at Random (MNAR)\nWhen data are MNAR, missingness is related to unobserved data, meaning the reason for missing data is itself unknown.\nExample: People with severe depression may be less likely to complete a survey. Because the cause of missingness is unmeasured, bias is likely and difficult to correct."
+  },
+  {
+    "objectID": "slides/growth_exercise.html#exercises",
+    "href": "slides/growth_exercise.html#exercises",
+    "title": "Exercise: real-world growth curves",
+    "section": "Exercises",
+    "text": "Exercises\n\nfind the correlation matrix for se1-se2-se3 ? hint: cor()\nfind the correlation between lf1 and se1? interpret the sign and magnitude\nwhat is the effect of dlf on lf1? hint: use lm(). interpret the estimates\nmake a spagettiplot of 25 random students for the growth in se\nestimate a linear growth model (without covariates) for lf.\nWhat is the model fit of the growth model? hint: use fitmeasures()\nAs in (5) but use estimator=“fiml” to handle missingness. Do the substantive conclusions change?\nMake histograms for the lf variables. Do the data appear normally distributed?\nRun the model with covariates: use dlf as predictor for slope and intercept. Interpret the effect of the predictor\nplot the path diagram of model from exc. 9."
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Duh 165 Applied statistics",
+    "title": "Duh 165 Applied statistics - Day 5",
     "section": "",
-    "text": "This is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites.\n\n1 + 1\n\n[1] 2"
+    "text": "Growth modeling in R and more\n📖 Introduction to growth modeling in R\n📖 Exercise: Working on a real dataset\nOn non-normal and ordinal-categorical data\nSome reflections on causality"
+  },
+  {
+    "objectID": "slides/slides1.html#about-me",
+    "href": "slides/slides1.html#about-me",
+    "title": "Friday DUH165",
+    "section": "About me",
+    "text": "About me\n\nNjål Foldnes, Professor in Statistics, Norwegian Reading Centre, University of Stavanger\n\nPublications\n\nSome special interests beyond psychometrics\n\nSocial media use and well-being: Critique of current research ( Kronikk )\nFlipped classroom method of learning in higher education"
+  },
+  {
+    "objectID": "slides/slides1.html#statistics-and-data-analysis",
+    "href": "slides/slides1.html#statistics-and-data-analysis",
+    "title": "Friday DUH165",
+    "section": "Statistics and data analysis",
+    "text": "Statistics and data analysis\n\nTaken from R for Data Science https://r4ds.hadley.nz/"
+  },
+  {
+    "objectID": "slides/slides1.html#overall-goals-for-today-learning-about",
+    "href": "slides/slides1.html#overall-goals-for-today-learning-about",
+    "title": "Friday DUH165",
+    "section": "Overall goals for today: Learning about",
+    "text": "Overall goals for today: Learning about\n\ntransparency and reproducibility with R\nrunning latent variable models with lavaan\ncritically reflecting on the limited capacity of observational studies in gaining causal insights"
+  },
+  {
+    "objectID": "slides/slides1.html#goals-wrt-statistical-and-r-know-how",
+    "href": "slides/slides1.html#goals-wrt-statistical-and-r-know-how",
+    "title": "Friday DUH165",
+    "section": "Goals wrt statistical and R know-how",
+    "text": "Goals wrt statistical and R know-how\n\nconvert long and wide data formats\nrun lavaan models\nvisualization with R\nproducing publication-ready tables with R\nordinal data mysteries\ngoodness-of-fit testing"
+  },
+  {
+    "objectID": "slides/slides1.html#translating-syntax",
+    "href": "slides/slides1.html#translating-syntax",
+    "title": "Friday DUH165",
+    "section": "Translating syntax",
+    "text": "Translating syntax\n\nlibrary(lavaan)\nlibrary(tidyverse)\nsyntax &lt;- \"TITLE:   this is an example of a linear growth\n    model for a continuous outcome \nDATA:   FILE IS ex6.1.dat;\nVARIABLE:   NAMES ARE y11-y14;\nMODEL:  i s | y11@0 y12@1 y13@2 y14@3;\"\n\nlavSyntax &lt;- mplus2lavaan.modelSyntax(syntax)\ncat(lavSyntax)\n\ni =~ 1*y11 + 1*y12 + 1*y13 + 1*y14\ns =~ 0*y11 + 1*y12 + 2*y13 + 3*y14"
+  },
+  {
+    "objectID": "slides/slides1.html#read-data",
+    "href": "slides/slides1.html#read-data",
+    "title": "Friday DUH165",
+    "section": "Read data",
+    "text": "Read data\n\n#read data\nmydata &lt;- read.table(\"../R/ex6.1.dat\")\ncolnames(mydata) &lt;- paste0(\"t\", 1:4)# rename V1 to t1 etc\nhead(mydata)\n\n         t1       t2       t3       t4\n1  0.036879 1.473688 1.683264 1.949616\n2 -2.692618 1.658446 2.212513 4.025840\n3  2.753870 5.125832 5.201780 6.776909\n4  1.869296 3.950356 6.268697 7.977363\n5  2.477338 2.124366 3.118937 5.106140\n6  0.613738 0.787826 1.131580 1.928382"
+  },
+  {
+    "objectID": "slides/slides1.html#inspecting-data-descriptives",
+    "href": "slides/slides1.html#inspecting-data-descriptives",
+    "title": "Friday DUH165",
+    "section": "Inspecting data: descriptives",
+    "text": "Inspecting data: descriptives\n\nlibrary(gtsummary)#package for nice tables\nmydata %&gt;%  tbl_summary() # using the pipe operator\n\n\n\n\n\n\n\nCharacteristic\nN = 5001\n\n\n\n\nt1\n0.56 (-0.30, 1.38)\n\n\nt2\n1.56 (0.76, 2.45)\n\n\nt3\n2.52 (1.30, 3.76)\n\n\nt4\n3.61 (2.28, 5.07)\n\n\n\n1 Median (Q1, Q3)\n\n\n\n\n\n\n\n\nIt is more common to use mean and sd for center and spread:\n\nmydata %&gt;% tbl_summary(statistic = list(all_continuous() ~ \"{mean} ({sd})\"))\n\n\n\n\n\n\n\nCharacteristic\nN = 5001\n\n\n\n\nt1\n0.51 (1.20)\n\n\nt2\n1.57 (1.41)\n\n\nt3\n2.57 (1.71)\n\n\nt4\n3.60 (2.08)\n\n\n\n1 Mean (SD)"
+  },
+  {
+    "objectID": "slides/slides1.html#inspecting-data-visually-histograms",
+    "href": "slides/slides1.html#inspecting-data-visually-histograms",
+    "title": "Friday DUH165",
+    "section": "Inspecting data visually: Histograms",
+    "text": "Inspecting data visually: Histograms\nConvert to long format\n\nmydata$id &lt;- seq(nrow(mydata))#add student id for spaggetti plotting\nlong &lt;- pivot_longer(mydata, 1:4, names_to=\"time\")\n\nThis dataset is synthetic, generated from normal distribution\n\nggplot(long, aes(value))+geom_histogram()+facet_wrap(time ~., ncol=4)"
+  },
+  {
+    "objectID": "slides/slides1.html#inspecting-data-visually-growth-curves-for-all",
+    "href": "slides/slides1.html#inspecting-data-visually-growth-curves-for-all",
+    "title": "Friday DUH165",
+    "section": "Inspecting data visually: Growth curves for all",
+    "text": "Inspecting data visually: Growth curves for all\nLinear growth seems reasonable:\n\nggplot(long, aes(time, value, group=id))+geom_line()"
+  },
+  {
+    "objectID": "slides/slides1.html#inspecting-data-visually-growth-curves-for-a-few-individuals",
+    "href": "slides/slides1.html#inspecting-data-visually-growth-curves-for-a-few-individuals",
+    "title": "Friday DUH165",
+    "section": "Inspecting data visually: Growth curves for a few individuals",
+    "text": "Inspecting data visually: Growth curves for a few individuals\n\nset.seed(1)# seed for random number generation\nidx &lt;- sample(seq(nrow(mydata)),25, replace = F )\nsubsample &lt;- filter(long, id %in% idx)# random sample of 25 individuals\nggplot(subsample, aes(time, value, group=id, color=factor(id)))+geom_line(show.legend=F)"
+  },
+  {
+    "objectID": "slides/slides1.html#running-the-model-in-lavaan",
+    "href": "slides/slides1.html#running-the-model-in-lavaan",
+    "title": "Friday DUH165",
+    "section": "Running the model in lavaan",
+    "text": "Running the model in lavaan\nRename variables in syntax and estimate with growth() function.\n\nlavSyntax &lt;- lavSyntax %&gt;% str_replace_all(\"y1\", \"t\")\nfit &lt;- growth(lavSyntax, data=mydata)\nsummary(fit)\n\nlavaan 0.6-19 ended normally after 25 iterations\n\n  Estimator                                         ML\n  Optimization method                           NLMINB\n  Number of model parameters                         9\n\n  Number of observations                           500\n\nModel Test User Model:\n                                                      \n  Test statistic                                 4.593\n  Degrees of freedom                                 5\n  P-value (Chi-square)                           0.468\n\nParameter Estimates:\n\n  Standard errors                             Standard\n  Information                                 Expected\n  Information saturated (h1) model          Structured\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i =~                                                \n    t1                1.000                           \n    t2                1.000                           \n    t3                1.000                           \n    t4                1.000                           \n  s =~                                                \n    t1                0.000                           \n    t2                1.000                           \n    t3                2.000                           \n    t4                3.000                           \n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i ~~                                                \n    s                 0.133    0.033    4.057    0.000\n\nIntercepts:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n    i                 0.523    0.051   10.153    0.000\n    s                 1.026    0.025   40.268    0.000\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .t1                0.475    0.059    7.989    0.000\n   .t2                0.482    0.040   11.994    0.000\n   .t3                0.473    0.047   10.007    0.000\n   .t4                0.545    0.084    6.471    0.000\n    i                 0.989    0.089   11.097    0.000\n    s                 0.224    0.023    9.891    0.000"
+  },
+  {
+    "objectID": "slides/slides1.html#path-model-with-the-semplot-package",
+    "href": "slides/slides1.html#path-model-with-the-semplot-package",
+    "title": "Friday DUH165",
+    "section": "path model with the semPlot package",
+    "text": "path model with the semPlot package\n\nlibrary(semPlot)\nsemPaths(fit, what=\"est\")"
+  },
+  {
+    "objectID": "slides/slides1.html#read-data-1",
+    "href": "slides/slides1.html#read-data-1",
+    "title": "Friday DUH165",
+    "section": "Read data",
+    "text": "Read data\n\n#read data\nmydata &lt;- read.table(\"../R/ex6.9.dat\")\ncolnames(mydata) &lt;- paste0(\"t\", 1:4)# rename V1 to t1 etc\nhead(mydata)\n\n         t1       t2        t3        t4\n1 -0.034766 2.149809  3.316856  4.351270\n2 -3.186517 3.514253  6.659098 14.020916\n3  3.102544 6.226947  7.792461 12.384995\n4  2.081126 4.918758 10.607136 18.716445\n5  2.783234 2.085865  4.012473  8.538765\n6  0.631334 0.944968  1.762660  3.073510"
+  },
+  {
+    "objectID": "slides/slides1.html#inspecting-data-descriptives-1",
+    "href": "slides/slides1.html#inspecting-data-descriptives-1",
+    "title": "Friday DUH165",
+    "section": "Inspecting data: descriptives",
+    "text": "Inspecting data: descriptives\nThe mean values go \\(x²\\): 0, 2, 4, 9, …. quadratic (synthetic dataset again)\n\nmydata %&gt;% tbl_summary(statistic = list(all_continuous() ~ \"{mean} ({sd})\"))\n\n\n\n\n\n\n\nCharacteristic\nN = 5001\n\n\n\n\nt1\n0.52 (1.39)\n\n\nt2\n2.09 (1.71)\n\n\nt3\n4.62 (2.82)\n\n\nt4\n8.2 (5.0)\n\n\n\n1 Mean (SD)"
+  },
+  {
+    "objectID": "slides/slides1.html#inspecting-data-visually-histograms-1",
+    "href": "slides/slides1.html#inspecting-data-visually-histograms-1",
+    "title": "Friday DUH165",
+    "section": "Inspecting data visually: Histograms",
+    "text": "Inspecting data visually: Histograms\nConvert to long format\n\nmydata$id &lt;- seq(nrow(mydata))#add student id for spaggetti plotting\nlong &lt;- pivot_longer(mydata, 1:4, names_to=\"time\")\n\nThis dataset is synthetic, generated from normal distribution\n\nggplot(long, aes(value))+geom_histogram()+facet_wrap(time ~., ncol=4)"
+  },
+  {
+    "objectID": "slides/slides1.html#inspecting-data-visually-growth-curves-for-all-1",
+    "href": "slides/slides1.html#inspecting-data-visually-growth-curves-for-all-1",
+    "title": "Friday DUH165",
+    "section": "Inspecting data visually: Growth curves for all",
+    "text": "Inspecting data visually: Growth curves for all\nQuadratic growth?\n\nggplot(long, aes(time, value, group=id))+geom_line()"
+  },
+  {
+    "objectID": "slides/slides1.html#inspecting-data-visually-growth-curves-for-a-few-individuals-1",
+    "href": "slides/slides1.html#inspecting-data-visually-growth-curves-for-a-few-individuals-1",
+    "title": "Friday DUH165",
+    "section": "Inspecting data visually: Growth curves for a few individuals",
+    "text": "Inspecting data visually: Growth curves for a few individuals\n\nset.seed(1)# seed for random number generation\nidx &lt;- sample(seq(nrow(mydata)),25, replace = F )\nsubsample &lt;- filter(long, id %in% idx)# random sample of 25 individuals\nggplot(subsample, aes(time, value, group=id, color=factor(id)))+geom_line(show.legend=F)"
+  },
+  {
+    "objectID": "slides/slides1.html#translating-syntax-1",
+    "href": "slides/slides1.html#translating-syntax-1",
+    "title": "Friday DUH165",
+    "section": "Translating syntax",
+    "text": "Translating syntax\n\nlibrary(lavaan)\nlibrary(tidyverse)\nsyntax &lt;- \"TITLE:   this is an example of a quadratic growth\n    model for a continuous outcome\n DATA:  FILE IS ex6.9.dat;\n VARIABLE:  NAMES ARE y11-y14;\n MODEL: i s q | y11@0 y12@1 y13@2 y14@3;\"\n\nlavSyntax &lt;- mplus2lavaan.modelSyntax(syntax)\ncat(lavSyntax)\n\ni =~ 1*y11 + 1*y12 + 1*y13 + 1*y14\ns =~ 0*y11 + 1*y12 + 2*y13 + 3*y14\nq =~ 0*y11 + 1*y12 + 4*y13 + 9*y14"
+  },
+  {
+    "objectID": "slides/slides1.html#running-the-model-in-lavaan-1",
+    "href": "slides/slides1.html#running-the-model-in-lavaan-1",
+    "title": "Friday DUH165",
+    "section": "Running the model in lavaan",
+    "text": "Running the model in lavaan\nRename variables in syntax and estimate with growth() function.\n\nlavSyntax &lt;- lavSyntax %&gt;% str_replace_all(\"y1\", \"t\")\nfit &lt;- growth(lavSyntax, data=mydata)\nsummary(fit)\n\nlavaan 0.6-19 ended normally after 44 iterations\n\n  Estimator                                         ML\n  Optimization method                           NLMINB\n  Number of model parameters                        13\n\n  Number of observations                           500\n\nModel Test User Model:\n                                                      \n  Test statistic                                 0.475\n  Degrees of freedom                                 1\n  P-value (Chi-square)                           0.490\n\nParameter Estimates:\n\n  Standard errors                             Standard\n  Information                                 Expected\n  Information saturated (h1) model          Structured\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i =~                                                \n    t1                1.000                           \n    t2                1.000                           \n    t3                1.000                           \n    t4                1.000                           \n  s =~                                                \n    t1                0.000                           \n    t2                1.000                           \n    t3                2.000                           \n    t4                3.000                           \n  q =~                                                \n    t1                0.000                           \n    t2                1.000                           \n    t3                4.000                           \n    t4                9.000                           \n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i ~~                                                \n    s                -0.173    0.300   -0.578    0.563\n    q                 0.101    0.080    1.269    0.204\n  s ~~                                                \n    q                -0.179    0.117   -1.525    0.127\n\nIntercepts:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n    i                 0.521    0.062    8.446    0.000\n    s                 1.035    0.077   13.462    0.000\n    q                 0.512    0.031   16.449    0.000\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .t1                0.685    0.265    2.591    0.010\n   .t2                0.882    0.114    7.708    0.000\n   .t3                0.946    0.183    5.180    0.000\n   .t4                0.738    0.944    0.781    0.435\n    i                 1.246    0.273    4.571    0.000\n    s                 0.998    0.358    2.789    0.005\n    q                 0.282    0.060    4.668    0.000"
+  },
+  {
+    "objectID": "slides/slides1.html#path-model",
+    "href": "slides/slides1.html#path-model",
+    "title": "Friday DUH165",
+    "section": "path model",
+    "text": "path model\n\nsemPaths(fit, what=\"est\")"
+  },
+  {
+    "objectID": "slides/growth_intro.html#about-me",
+    "href": "slides/growth_intro.html#about-me",
+    "title": "Friday DUH165- Growth curves",
+    "section": "About me",
+    "text": "About me\n\nNjål Foldnes, Professor in Statistics, Norwegian Reading Centre, University of Stavanger\n\nPublications\n\nSome special interests beyond psychometrics\n\nSocial media use and well-being: Critique of current research ( Kronikk )\nFlipped classroom method of learning in higher education"
+  },
+  {
+    "objectID": "slides/growth_intro.html#statistics-and-data-analysis",
+    "href": "slides/growth_intro.html#statistics-and-data-analysis",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Statistics and data analysis",
+    "text": "Statistics and data analysis\n\nTaken from R for Data Science https://r4ds.hadley.nz/"
+  },
+  {
+    "objectID": "slides/growth_intro.html#overall-goals-for-today-learning-about",
+    "href": "slides/growth_intro.html#overall-goals-for-today-learning-about",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Overall goals for today: Learning about",
+    "text": "Overall goals for today: Learning about\n\ntransparency and reproducibility with R\nrunning latent variable models with lavaan\ncritically reflecting on the limited capacity of observational studies in gaining causal insights"
+  },
+  {
+    "objectID": "slides/growth_intro.html#goals-wrt-statistical-and-r-know-how",
+    "href": "slides/growth_intro.html#goals-wrt-statistical-and-r-know-how",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Goals wrt statistical and R know-how",
+    "text": "Goals wrt statistical and R know-how\n\nconvert long and wide data formats\nrun lavaan models\nvisualization with R\nproducing publication-ready tables with R\nordinal data mysteries\ngoodness-of-fit testing"
+  },
+  {
+    "objectID": "slides/growth_intro.html#translating-syntax",
+    "href": "slides/growth_intro.html#translating-syntax",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Translating syntax",
+    "text": "Translating syntax\n\nlibrary(lavaan)\nlibrary(tidyverse)\nsyntax &lt;- \"TITLE:   this is an example of a linear growth\n    model for a continuous outcome \nDATA:   FILE IS ex6.1.dat;\nVARIABLE:   NAMES ARE y11-y14;\nMODEL:  i s | y11@0 y12@1 y13@2 y14@3;\"\n\nlavSyntax &lt;- mplus2lavaan.modelSyntax(syntax)\ncat(lavSyntax)\n\ni =~ 1*y11 + 1*y12 + 1*y13 + 1*y14\ns =~ 0*y11 + 1*y12 + 2*y13 + 3*y14"
+  },
+  {
+    "objectID": "slides/growth_intro.html#read-data",
+    "href": "slides/growth_intro.html#read-data",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Read data",
+    "text": "Read data\n\n#read data\nmydata &lt;- read.table(\"../R/ex6.1.dat\")\ncolnames(mydata) &lt;- paste0(\"t\", 1:4)# rename V1 to t1 etc\nhead(mydata)\n\n         t1       t2       t3       t4\n1  0.036879 1.473688 1.683264 1.949616\n2 -2.692618 1.658446 2.212513 4.025840\n3  2.753870 5.125832 5.201780 6.776909\n4  1.869296 3.950356 6.268697 7.977363\n5  2.477338 2.124366 3.118937 5.106140\n6  0.613738 0.787826 1.131580 1.928382"
+  },
+  {
+    "objectID": "slides/growth_intro.html#inspecting-data-descriptives",
+    "href": "slides/growth_intro.html#inspecting-data-descriptives",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Inspecting data: descriptives",
+    "text": "Inspecting data: descriptives\n\nlibrary(gtsummary)#package for nice tables\nmydata %&gt;%  tbl_summary() # using the pipe operator\n\n\n\n\n\n\n\nCharacteristic\nN = 5001\n\n\n\n\nt1\n0.56 (-0.30, 1.38)\n\n\nt2\n1.56 (0.76, 2.45)\n\n\nt3\n2.52 (1.30, 3.76)\n\n\nt4\n3.61 (2.28, 5.07)\n\n\n\n1 Median (Q1, Q3)\n\n\n\n\n\n\n\n\nIt is more common to use mean and sd for center and spread:\n\nmydata %&gt;% tbl_summary(statistic = list(all_continuous() ~ \"{mean} ({sd})\"))\n\n\n\n\n\n\n\nCharacteristic\nN = 5001\n\n\n\n\nt1\n0.51 (1.20)\n\n\nt2\n1.57 (1.41)\n\n\nt3\n2.57 (1.71)\n\n\nt4\n3.60 (2.08)\n\n\n\n1 Mean (SD)"
+  },
+  {
+    "objectID": "slides/growth_intro.html#inspecting-data-visually-histograms",
+    "href": "slides/growth_intro.html#inspecting-data-visually-histograms",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Inspecting data visually: Histograms",
+    "text": "Inspecting data visually: Histograms\nConvert to long format\n\nmydata$id &lt;- seq(nrow(mydata))#add student id for spaggetti plotting\nlong &lt;- pivot_longer(mydata, 1:4, names_to=\"time\")\n\nThis dataset is synthetic, generated from normal distribution\n\nggplot(long, aes(value))+geom_histogram()+facet_wrap(time ~., ncol=4)"
+  },
+  {
+    "objectID": "slides/growth_intro.html#inspecting-data-visually-growth-curves-for-all",
+    "href": "slides/growth_intro.html#inspecting-data-visually-growth-curves-for-all",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Inspecting data visually: Growth curves for all",
+    "text": "Inspecting data visually: Growth curves for all\nLinear growth seems reasonable:\n\nggplot(long, aes(time, value, group=id))+geom_line()"
+  },
+  {
+    "objectID": "slides/growth_intro.html#inspecting-data-visually-growth-curves-for-a-few-individuals",
+    "href": "slides/growth_intro.html#inspecting-data-visually-growth-curves-for-a-few-individuals",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Inspecting data visually: Growth curves for a few individuals",
+    "text": "Inspecting data visually: Growth curves for a few individuals\n\nset.seed(1)# seed for random number generation\nidx &lt;- sample(seq(nrow(mydata)),25, replace = F )\nsubsample &lt;- filter(long, id %in% idx)# random sample of 25 individuals\nggplot(subsample, aes(time, value, group=id, color=factor(id)))+geom_line(show.legend=F)"
+  },
+  {
+    "objectID": "slides/growth_intro.html#running-the-model-in-lavaan",
+    "href": "slides/growth_intro.html#running-the-model-in-lavaan",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Running the model in lavaan",
+    "text": "Running the model in lavaan\nRename variables in syntax and estimate with growth() function.\n\nlavSyntax &lt;- lavSyntax %&gt;% str_replace_all(\"y1\", \"t\")\nfit &lt;- growth(lavSyntax, data=mydata)\nsummary(fit)\n\nlavaan 0.6-19 ended normally after 25 iterations\n\n  Estimator                                         ML\n  Optimization method                           NLMINB\n  Number of model parameters                         9\n\n  Number of observations                           500\n\nModel Test User Model:\n                                                      \n  Test statistic                                 4.593\n  Degrees of freedom                                 5\n  P-value (Chi-square)                           0.468\n\nParameter Estimates:\n\n  Standard errors                             Standard\n  Information                                 Expected\n  Information saturated (h1) model          Structured\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i =~                                                \n    t1                1.000                           \n    t2                1.000                           \n    t3                1.000                           \n    t4                1.000                           \n  s =~                                                \n    t1                0.000                           \n    t2                1.000                           \n    t3                2.000                           \n    t4                3.000                           \n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i ~~                                                \n    s                 0.133    0.033    4.057    0.000\n\nIntercepts:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n    i                 0.523    0.051   10.153    0.000\n    s                 1.026    0.025   40.268    0.000\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .t1                0.475    0.059    7.989    0.000\n   .t2                0.482    0.040   11.994    0.000\n   .t3                0.473    0.047   10.007    0.000\n   .t4                0.545    0.084    6.471    0.000\n    i                 0.989    0.089   11.097    0.000\n    s                 0.224    0.023    9.891    0.000"
+  },
+  {
+    "objectID": "slides/growth_intro.html#path-model-with-the-semplot-package",
+    "href": "slides/growth_intro.html#path-model-with-the-semplot-package",
+    "title": "Friday DUH165- Growth curves",
+    "section": "path model with the semPlot package",
+    "text": "path model with the semPlot package\n\nlibrary(semPlot)\nsemPaths(fit, what=\"est\")"
+  },
+  {
+    "objectID": "slides/growth_intro.html#read-data-1",
+    "href": "slides/growth_intro.html#read-data-1",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Read data",
+    "text": "Read data\n\n#read data\nmydata &lt;- read.table(\"../R/ex6.9.dat\")\ncolnames(mydata) &lt;- paste0(\"t\", 1:4)# rename V1 to t1 etc\nhead(mydata)\n\n         t1       t2        t3        t4\n1 -0.034766 2.149809  3.316856  4.351270\n2 -3.186517 3.514253  6.659098 14.020916\n3  3.102544 6.226947  7.792461 12.384995\n4  2.081126 4.918758 10.607136 18.716445\n5  2.783234 2.085865  4.012473  8.538765\n6  0.631334 0.944968  1.762660  3.073510"
+  },
+  {
+    "objectID": "slides/growth_intro.html#inspecting-data-descriptives-1",
+    "href": "slides/growth_intro.html#inspecting-data-descriptives-1",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Inspecting data: descriptives",
+    "text": "Inspecting data: descriptives\nThe mean values go \\(x²\\): 0, 2, 4, 9, …. quadratic (synthetic dataset again)\n\nmydata %&gt;% tbl_summary(statistic = list(all_continuous() ~ \"{mean} ({sd})\"))\n\n\n\n\n\n\n\nCharacteristic\nN = 5001\n\n\n\n\nt1\n0.52 (1.39)\n\n\nt2\n2.09 (1.71)\n\n\nt3\n4.62 (2.82)\n\n\nt4\n8.2 (5.0)\n\n\n\n1 Mean (SD)"
+  },
+  {
+    "objectID": "slides/growth_intro.html#inspecting-data-visually-histograms-1",
+    "href": "slides/growth_intro.html#inspecting-data-visually-histograms-1",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Inspecting data visually: Histograms",
+    "text": "Inspecting data visually: Histograms\nConvert to long format\n\nmydata$id &lt;- seq(nrow(mydata))#add student id for spaggetti plotting\nlong &lt;- pivot_longer(mydata, 1:4, names_to=\"time\")\n\nThis dataset is synthetic, generated from normal distribution\n\nggplot(long, aes(value))+geom_histogram()+facet_wrap(time ~., ncol=4)"
+  },
+  {
+    "objectID": "slides/growth_intro.html#covariates",
+    "href": "slides/growth_intro.html#covariates",
+    "title": "Friday DUH165- Growth curves",
+    "section": "covariates",
+    "text": "covariates\nmplus ex. 6.10 has two continuous variables that predict the interept and slope, and the growth process is controlled for a variable \\(a\\) at each time point. So we want to explain the growth while taking \\(a\\) into account.\nGrowth over and beyond that accounted for by \\(a\\)."
+  },
+  {
+    "objectID": "slides/growth_intro.html#read-data-2",
+    "href": "slides/growth_intro.html#read-data-2",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Read data",
+    "text": "Read data\n\n#read data\nmydata &lt;- read.table(\"../R/ex6.10.dat\")\ncolnames(mydata) &lt;- c(paste0(\"t\", 1:4), \"x1\", \"x2\", paste0(\"a\", 1:4))\nhead(mydata)\n\n         t1        t2        t3        t4        x1        x2        a1\n1  0.780449  2.220550  4.572054  8.798249 -0.378137  0.299639 -0.642262\n2  2.462900  1.970866  2.781247  4.293159 -0.547830 -0.108472  1.118025\n3 -2.236374 -1.204204 -2.784513 -2.554476  0.092867 -0.760867 -0.813384\n4  1.626510  0.023338  0.450601  1.428872 -0.631615 -0.832249  0.659012\n5  2.476976  4.371565  6.985660  8.481588  0.160026  2.815955 -1.966773\n6  0.132126  1.761264  2.064123  3.155385  1.670470 -0.647520  1.132442\n         a2        a3        a4\n1 -0.880031 -2.606761  2.390625\n2  1.383101  1.497752  0.642068\n3 -0.227459  0.194822 -0.798527\n4 -0.558788  1.680715 -0.035300\n5  0.273483  1.334480 -0.646794\n6  0.691526  0.001154 -0.228155"
+  },
+  {
+    "objectID": "slides/growth_intro.html#inspecting-data-descriptives-2",
+    "href": "slides/growth_intro.html#inspecting-data-descriptives-2",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Inspecting data: descriptives",
+    "text": "Inspecting data: descriptives\n\nmydata %&gt;% tbl_summary(statistic = list(all_continuous() ~ \"{mean} ({sd})\"))\n\n\n\n\n\n\n\nCharacteristic\nN = 5001\n\n\n\n\nt1\n0.61 (1.55)\n\n\nt2\n1.69 (2.09)\n\n\nt3\n2.72 (2.66)\n\n\nt4\n3.8 (3.2)\n\n\nx1\n-0.07 (1.00)\n\n\nx2\n0.13 (0.97)\n\n\na1\n0.03 (0.95)\n\n\na2\n-0.06 (1.01)\n\n\na3\n0.04 (0.98)\n\n\na4\n-0.04 (0.96)\n\n\n\n1 Mean (SD)"
+  },
+  {
+    "objectID": "slides/growth_intro.html#inspecting-data-visually-histograms-2",
+    "href": "slides/growth_intro.html#inspecting-data-visually-histograms-2",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Inspecting data visually: Histograms",
+    "text": "Inspecting data visually: Histograms\nConvert to long format\n\nmydata$id &lt;- seq(nrow(mydata))#add student id for spaggetti plotting\nlong &lt;- pivot_longer(mydata, 1:10)# default name is \"value\"\n\nThis dataset is synthetic, generated from normal distribution\n\nggplot(long, aes(value))+geom_histogram()+facet_wrap(name ~., ncol=5)"
+  },
+  {
+    "objectID": "slides/growth_intro.html#inspecting-data-visually-growth-curves-without-a-taken-into-account",
+    "href": "slides/growth_intro.html#inspecting-data-visually-growth-curves-without-a-taken-into-account",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Inspecting data visually: Growth curves without \\(a\\) taken into account",
+    "text": "Inspecting data visually: Growth curves without \\(a\\) taken into account\n\ntmp &lt;- filter(long, name %in% paste0(\"t\", 1:4)) # only the target variables\nggplot(tmp, aes(name, value, group=id))+geom_line()"
+  },
+  {
+    "objectID": "slides/growth_intro.html#inspecting-data-visually-growth-curves-for-a-few-individuals-1",
+    "href": "slides/growth_intro.html#inspecting-data-visually-growth-curves-for-a-few-individuals-1",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Inspecting data visually: Growth curves for a few individuals",
+    "text": "Inspecting data visually: Growth curves for a few individuals\n\nset.seed(1)# seed for random number generation\nidx &lt;- sample(seq(nrow(mydata)),25, replace = F )\nsubsample &lt;- filter(tmp, id %in% idx)# random sample of 25 individuals\nggplot(subsample, aes(name, value, group=id, color=factor(id)))+geom_line(show.legend=F)"
+  },
+  {
+    "objectID": "slides/growth_intro.html#translating-syntax-1",
+    "href": "slides/growth_intro.html#translating-syntax-1",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Translating syntax",
+    "text": "Translating syntax\n\nlibrary(lavaan)\nlibrary(tidyverse)\nsyntax &lt;- \"TITLE:   this is an example of a linear growth\n    model for a continuous outcome with time-\n    invariant and time-varying covariates\nDATA:   FILE IS ex6.10.dat;\nVARIABLE:   NAMES ARE y11-y14 x1 x2 a31-a34;\nMODEL:  i s | y11@0 y12@1 y13@2 y14@3;\n    i s ON x1 x2;\n    y11 ON a31;\n    y12 ON a32;\n    y13 ON a33;\n    y14 ON a34;\"\n\nlavSyntax &lt;- mplus2lavaan.modelSyntax(syntax)\ncat(lavSyntax)\n\ni =~ 1*y11 + 1*y12 + 1*y13 + 1*y14\ns =~ 0*y11 + 1*y12 + 2*y13 + 3*y14\ni ~ x1 + x2\ns ~ x1 + x2\ny11 ~ a31\ny12 ~ a32\ny13 ~ a33\ny14 ~ a34"
+  },
+  {
+    "objectID": "slides/growth_intro.html#running-the-model-in-lavaan-1",
+    "href": "slides/growth_intro.html#running-the-model-in-lavaan-1",
+    "title": "Friday DUH165- Growth curves",
+    "section": "Running the model in lavaan",
+    "text": "Running the model in lavaan\nRename variables in syntax and estimate with growth() function.\n\nlavSyntax &lt;- lavSyntax %&gt;% str_replace_all(\"y1\", \"t\") %&gt;% \n  str_replace_all(\"a3\", \"a\")\nfit &lt;- growth(lavSyntax, data=mydata)\nsummary(fit)\n\nlavaan 0.6-19 ended normally after 29 iterations\n\n  Estimator                                         ML\n  Optimization method                           NLMINB\n  Number of model parameters                        17\n\n  Number of observations                           500\n\nModel Test User Model:\n                                                      \n  Test statistic                                25.786\n  Degrees of freedom                                21\n  P-value (Chi-square)                           0.215\n\nParameter Estimates:\n\n  Standard errors                             Standard\n  Information                                 Expected\n  Information saturated (h1) model          Structured\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i =~                                                \n    t1                1.000                           \n    t2                1.000                           \n    t3                1.000                           \n    t4                1.000                           \n  s =~                                                \n    t1                0.000                           \n    t2                1.000                           \n    t3                2.000                           \n    t4                3.000                           \n\nRegressions:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i ~                                                 \n    x1                0.557    0.054   10.285    0.000\n    x2                0.718    0.055   12.953    0.000\n  s ~                                                 \n    x1                0.264    0.025   10.549    0.000\n    x2                0.473    0.026   18.438    0.000\n  t1 ~                                                \n    a1                0.190    0.044    4.302    0.000\n  t2 ~                                                \n    a2                0.323    0.038    8.433    0.000\n  t3 ~                                                \n    a3                0.344    0.038    9.016    0.000\n  t4 ~                                                \n    a4                0.303    0.050    6.004    0.000\n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n .i ~~                                                \n   .s                 0.055    0.035    1.588    0.112\n\nIntercepts:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .i                 0.570    0.054   10.477    0.000\n   .s                 1.010    0.025   40.112    0.000\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .t1                0.509    0.068    7.513    0.000\n   .t2                0.597    0.048   12.348    0.000\n   .t3                0.481    0.049    9.858    0.000\n   .t4                0.579    0.088    6.606    0.000\n   .i                 1.074    0.098   10.922    0.000\n   .s                 0.201    0.022    9.092    0.000"
+  },
+  {
+    "objectID": "slides/growth_intro.html#path-model",
+    "href": "slides/growth_intro.html#path-model",
+    "title": "Friday DUH165- Growth curves",
+    "section": "path model",
+    "text": "path model\n\nsemPaths(fit, what=\"est\")"
   }
 ]

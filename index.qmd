@@ -1,12 +1,15 @@
 ---
-title: "Duh 165 Applied statistics"
+title: "Duh 165 Applied statistics - Day 5"
+author: "Njål Foldnes, National Reading Centre, UiS"
 tbl-colwidths: [10,30,10,10,10]
 ---
 
-This is a Quarto website.
+# Growth modeling in R and more
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+[📖](slides/growth_intro.qmd) Introduction to growth modeling in R
 
-```{r}
-1 + 1
-```
+[📖](slides/growth_exercise.qmd) Exercise: Working on a real dataset
+
+On non-normal and ordinal-categorical data
+
+Some reflections on causality
