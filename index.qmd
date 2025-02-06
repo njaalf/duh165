@@ -12,4 +12,4 @@ tbl-colwidths: [10,30,10,10,10]
 
 [📖](slides/non_normality.qmd) On non-normal and ordinal-categorical data
 
-Some reflections on causality
+[📖](slides/causality.qmd) Some remarks on causal estimands

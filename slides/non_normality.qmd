@@ -171,27 +171,35 @@ and  use pEBA or SB test statistics
 ## The standard errors are biased with ML
 
 ```{r}
-forig <- cfa(model, normsample, std.lv=T)#true values
 ford <- cfa(model, data=ordsample, ordered=colnames(ordsample), std.lv=T)
 fcontml <- cfa(model, data=ordsample, std.lv=T)
 fcontmlm <- cfa(model, data=ordsample, std.lv=T, estimator="MLM")
-orig <- standardizedsolution(forig)[1:6, "se"]
 ord <- standardizedsolution(ford)[1:6, "se"]
 ml <- standardizedsolution(fcontml)[1:6, "se"]
 mlm <- standardizedsolution(fcontmlm)[1:6, "se"]
 
-df <- data.frame(est.std=c(orig, ord, ml, mlm), 
-                 method=rep(c("orig", "ord", "ml", "mlm"), each=6),
-                 parameter=rep(1:6,4))
+df <- data.frame(est.std=c( ord, ml, mlm), 
+                 method=rep(c( "ord", "ml", "mlm"), each=6),
+                 parameter=rep(1:6,3))
 
 ```
 
-<!-- ## Standar error estimates -->
+## Standard error estimates
 
-<!-- ```{r} -->
-<!-- ggplot(df, aes(parameter, est.std, group=method, color=method))+ -->
-<!--   geom_point()+geom_line() -->
-<!-- ``` -->
+```{r}
+ggplot(df, aes(parameter, est.std, group=method, color=method))+
+  geom_point()+geom_line()
+```
+
+## A digression: Reliability
+
+Either cronbachs $\alpha$ or $\Omega$, as implemented in the psych package. 
+```{r}
+library(psych)
+alpha(ordsample[, 1:3])
+```
+
+
 
 
 ## References

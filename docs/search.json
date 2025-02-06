@@ -168,6 +168,27 @@
     "text": "path model\n\nsemPaths(fit, what=\"est\")"
   },
   {
+    "objectID": "slides/causality.html#what-is-your-estimand",
+    "href": "slides/causality.html#what-is-your-estimand",
+    "title": "Two good papers on causal estimands and causality",
+    "section": "What is your estimand?",
+    "text": "What is your estimand?\n\n(Lundberg, Johnson, and Stewart 2021) focuses on the target quantity of interest, instead of the statistical analysis\nFirst, we must define the thing we are estimating!\nIn an empirical paper, the author should first define the theoretical estimand prior and outside of any statistical model\nThen link this theoretical estimand to an empirical estimand (a coefficient in a statistical model), explaining why the empirical estimand is informative"
+  },
+  {
+    "objectID": "slides/causality.html#causal-inference",
+    "href": "slides/causality.html#causal-inference",
+    "title": "Two good papers on causal estimands and causality",
+    "section": "Causal inference",
+    "text": "Causal inference\nBailey, D.H., Jung, A.J., Beltz, A.M. et al. Causal inference on human behaviour. Nat Hum Behav 8, 1448–1459 (2024). https://doi.org/10.1038/s41562-024-01939-z\n\n\n\n\n\n\n\n\nLundberg, Ian, Rebecca Johnson, and Brandon M Stewart. 2021. “What Is Your Estimand? Defining the Target Quantity Connects Statistical Evidence to Theory.” American Sociological Review 86 (3): 532–65."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Duh 165 Applied statistics - Day 5",
+    "section": "",
+    "text": "Growth modeling in R and more\n📖 Introduction to growth modeling in R\n📖 Exercise: Working on a real dataset\n📖 On non-normal and ordinal-categorical data\n📖 Some remarks on causal estimands"
+  },
+  {
     "objectID": "slides/non_normality.html#multivariate-normality-is-not-normal",
     "href": "slides/non_normality.html#multivariate-normality-is-not-normal",
     "title": "Handling non-normal data",
@@ -270,7 +291,21 @@
     "href": "slides/non_normality.html#the-standard-errors-are-biased-with-ml",
     "title": "Handling non-normal data",
     "section": "The standard errors are biased with ML",
-    "text": "The standard errors are biased with ML\n\nforig &lt;- cfa(model, normsample, std.lv=T)#true values\nford &lt;- cfa(model, data=ordsample, ordered=colnames(ordsample), std.lv=T)\nfcontml &lt;- cfa(model, data=ordsample, std.lv=T)\nfcontmlm &lt;- cfa(model, data=ordsample, std.lv=T, estimator=\"MLM\")\norig &lt;- standardizedsolution(forig)[1:6, \"se\"]\nord &lt;- standardizedsolution(ford)[1:6, \"se\"]\nml &lt;- standardizedsolution(fcontml)[1:6, \"se\"]\nmlm &lt;- standardizedsolution(fcontmlm)[1:6, \"se\"]\n\ndf &lt;- data.frame(est.std=c(orig, ord, ml, mlm), \n                 method=rep(c(\"orig\", \"ord\", \"ml\", \"mlm\"), each=6),\n                 parameter=rep(1:6,4))"
+    "text": "The standard errors are biased with ML\n\nford &lt;- cfa(model, data=ordsample, ordered=colnames(ordsample), std.lv=T)\nfcontml &lt;- cfa(model, data=ordsample, std.lv=T)\nfcontmlm &lt;- cfa(model, data=ordsample, std.lv=T, estimator=\"MLM\")\nord &lt;- standardizedsolution(ford)[1:6, \"se\"]\nml &lt;- standardizedsolution(fcontml)[1:6, \"se\"]\nmlm &lt;- standardizedsolution(fcontmlm)[1:6, \"se\"]\n\ndf &lt;- data.frame(est.std=c( ord, ml, mlm), \n                 method=rep(c( \"ord\", \"ml\", \"mlm\"), each=6),\n                 parameter=rep(1:6,3))"
+  },
+  {
+    "objectID": "slides/non_normality.html#standard-error-estimates",
+    "href": "slides/non_normality.html#standard-error-estimates",
+    "title": "Handling non-normal data",
+    "section": "Standard error estimates",
+    "text": "Standard error estimates\n\nggplot(df, aes(parameter, est.std, group=method, color=method))+\n  geom_point()+geom_line()"
+  },
+  {
+    "objectID": "slides/non_normality.html#a-digression-reliability",
+    "href": "slides/non_normality.html#a-digression-reliability",
+    "title": "Handling non-normal data",
+    "section": "A digression: Reliability",
+    "text": "A digression: Reliability\nEither cronbachs \\(\\alpha\\) or \\(\\Omega\\), as implemented in the psych package.\n\nlibrary(psych)\nalpha(ordsample[, 1:3])\n\n\nReliability analysis   \nCall: alpha(x = ordsample[, 1:3])\n\n  raw_alpha std.alpha G6(smc) average_r S/N   ase mean   sd median_r\n      0.69      0.69     0.6      0.42 2.2 0.024  3.5 0.94     0.42\n\n    95% confidence boundaries \n         lower alpha upper\nFeldt     0.64  0.69  0.73\nDuhachek  0.64  0.69  0.74\n\n Reliability if an item is dropped:\n   raw_alpha std.alpha G6(smc) average_r S/N alpha se var.r med.r\nx1      0.61      0.61    0.44      0.44 1.6    0.035    NA  0.44\nx2      0.58      0.59    0.41      0.41 1.4    0.037    NA  0.41\nx3      0.59      0.59    0.42      0.42 1.5    0.036    NA  0.42\n\n Item statistics \n     n raw.r std.r r.cor r.drop mean  sd\nx1 500  0.77  0.78  0.59   0.49  3.5 1.2\nx2 500  0.79  0.79  0.62   0.51  3.5 1.2\nx3 500  0.79  0.79  0.61   0.50  3.5 1.2\n\nNon missing response frequency for each item\n      1    2    3    4    5 miss\nx1 0.09 0.07 0.35 0.26 0.23    0\nx2 0.09 0.07 0.33 0.27 0.24    0\nx3 0.11 0.05 0.33 0.25 0.26    0"
   },
   {
     "objectID": "slides/non_normality.html#references",
@@ -278,13 +313,6 @@
     "title": "Handling non-normal data",
     "section": "References",
     "text": "References\n\n\nFoldnes, Njål, and Steffen Grønneberg. 2022. “The Sensitivity of Structural Equation Modeling with Ordinal Data to Underlying Non-Normality and Observed Distributional Forms.” Psychological Methods 27 (4): 541.\n\n\nFoldnes, Njål, Jonas Moss, and Steffen Grønneberg. 2025. “Improved Goodness of Fit Procedures for Structural Equation Models.” Structural Equation Modeling: A Multidisciplinary Journal 32 (1): 1–13.\n\n\nRhemtulla, Mijke, Patricia É Brosseau-Liard, and Victoria Savalei. 2012. “When Can Categorical Variables Be Treated as Continuous? A Comparison of Robust Continuous and Categorical SEM Estimation Methods Under Suboptimal Conditions.” Psychological Methods 17 (3): 354."
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Duh 165 Applied statistics - Day 5",
-    "section": "",
-    "text": "Growth modeling in R and more\n📖 Introduction to growth modeling in R\n📖 Exercise: Working on a real dataset\n📖 On non-normal and ordinal-categorical data\nSome reflections on causality"
   },
   {
     "objectID": "slides/growth_exercise.html#studying-reading-and-motivational-development-in-two-risk-groups",

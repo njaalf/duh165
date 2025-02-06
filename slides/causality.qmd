@@ -1,0 +1,40 @@
+---
+title: "Two good papers on causal estimands and causality"
+bibliography: references.bib
+
+title-slide-attributes:
+    data-background-image: missplot.png
+    data-background-size: stretch
+    data-background-opacity: "0.5"
+    
+format: 
+  revealjs
+editor: source
+execute: 
+  echo: true
+  message: false
+  warning: false
+---
+
+```{r, echo=F}
+library(tidyverse)
+theme_set(theme_minimal())
+```
+
+## What is your estimand?
+
+-   [@lundberg] focuses on the *target quantity* of interest, instead of the statistical analysis
+
+-   First, we must define the thing we are estimating!
+
+-   In an empirical paper, the author should *first* define the theoretical estimand prior and outside of any statistical model
+
+-   Then link this theoretical estimand to an empirical estimand (a coefficient in a statistical model), explaining why the empirical estimand is informative
+
+## Causal inference
+
+Bailey, D.H., Jung, A.J., Beltz, A.M. et al. Causal inference on human behaviour. Nat Hum Behav 8, 1448–1459 (2024). https://doi.org/10.1038/s41562-024-01939-z
+
+
+
+
