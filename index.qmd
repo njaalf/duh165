@@ -10,6 +10,6 @@ tbl-colwidths: [10,30,10,10,10]
 
 [📖](slides/growth_exercise.qmd) Exercise: Working on a real dataset
 
-On non-normal and ordinal-categorical data
+[📖](slides/non_normality.qmd) On non-normal and ordinal-categorical data
 
 Some reflections on causality

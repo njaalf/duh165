@@ -10,7 +10,7 @@
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.5.57">
 
-  <title>Duh 165 Applied Statistics - Friday lecture – Exercise: real-world growth curves</title>
+  <title>Duh 165 Applied Statistics - Friday lecture – Handling non-normal data</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -93,7 +93,27 @@
     code span.va { color: #111111; } /* Variable */
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
-  </style>
+    /* CSS for citations */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+      margin-bottom: 0em;
+    }
+    .hanging-indent div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }  </style>
   <link rel="stylesheet" href="../site_libs/revealjs/dist/theme/quarto.css">
   <link href="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
@@ -390,622 +410,140 @@
     <div class="slides">
 
 <section id="title-slide" data-background-image="missplot.png" data-background-opacity="0.5" data-background-size="stretch" class="quarto-title-block center">
-  <h1 class="title">Exercise: real-world growth curves</h1>
+  <h1 class="title">Handling non-normal data</h1>
 
 <div class="quarto-title-authors">
 </div>
 
 </section>
-<section id="studying-reading-and-motivational-development-in-two-risk-groups" class="slide level2">
-<h2>Studying reading and motivational development in two risk groups</h2>
+<section id="multivariate-normality-is-not-normal" class="slide level2">
+<h2>Multivariate normality is not normal</h2>
 <ul>
-<li>sample downloadable from homepage (left margin) of elementary school children through grades 1-3</li>
-<li>Two outcome measures: se (self-efficacy) and lf (listening comprehension)</li>
-<li>Two groups of children (variable dlf)
+<li><p>CFA and SEM theory first developed for multivariate normal (MVN) data. The default ML estimator assumes multivariate normality.</p></li>
+<li><p>However, data are rarely MVN.</p>
 <ul>
-<li>PoorD = “Poor decoders, ok comprehension”</li>
-<li>PoorC = “Poor comprehension, ok decoding”</li>
+<li>Either we have continuous non-normal data (not often)</li>
+<li>Or, we have discrete data (very often)
+<ul>
+<li>Likert scales</li>
+<li>Sum scores</li>
+</ul></li>
 </ul></li>
 </ul>
-<p>Read data (uses the compact R file format .rds )</p>
+</section>
+<section id="handling-non-normal-continuous-data" class="slide level2">
+<h2>Handling non-normal continuous data</h2>
+<ul>
+<li><p>We can use the MLM estimator and all is good wrt standard errors.</p></li>
+<li><p>For model fit <span class="math inline">\(\chi^2\)</span> there are many options. See <span class="citation" data-cites="foldnes2025improved">Foldnes, Moss, and Grønneberg (<a href="#/testing-model-fit-under-non-normality" role="doc-biblioref" onclick="">2025</a>)</span></p>
+<ul>
+<li>Satorra-Bentler scaling is the classic approach</li>
+<li>The scaled-and-shifted test is another alternative, it is very conservative (low power)</li>
+<li>Some new approaches (known as pEBA) soon to implemented in lavaan looks promising!</li>
+</ul></li>
+</ul>
+</section>
+<section id="generating-a-non-normal-dataset" class="slide level2">
+<h2>Generating a non-normal dataset</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a><span class="fu">library</span>(lavaan); <span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-2"><a></a>mydata <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"../data/growth_reading.rds"</span>)</span>
-<span id="cb1-3"><a></a><span class="fu">head</span>(mydata)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a><span class="fu">library</span>(lavaan)</span>
+<span id="cb1-2"><a></a>model <span class="ot">&lt;-</span> <span class="st">"F1=~x1+x2+x3; F2=~x4+x5+x6; F1 ~~ start(0.5)*F2"</span></span>
+<span id="cb1-3"><a></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb1-4"><a></a>nonnormsample <span class="ot">&lt;-</span> <span class="fu">simulateData</span>(model, <span class="at">skewness =</span> <span class="dv">3</span>, <span class="at">kurtosis=</span><span class="dv">21</span>)</span>
+<span id="cb1-5"><a></a><span class="fu">head</span>(nonnormsample,<span class="dv">2</span>)<span class="co">#two first rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 7
-    lf1   lf2   lf3   se1   se2   se3 dlf  
-  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;fct&gt;
-1     6     5    16    24    21    22 PoorC
-2     9    23    20    18    19    19 PoorC
-3    10    13    17    18    20    21 PoorD
-4    10    21    22    25    23    19 PoorC
-5     3     1     4    25    14    16 PoorD
-6     4     4     9    10    17     9 PoorD</code></pre>
+<pre><code>          x1         x2         x3         x4        x5         x6
+1 -0.6231198 0.98570222  0.3642348 -0.4894269 0.1631721  1.0512031
+2 -0.5284359 0.02540388 -0.4231360 -0.9600514 0.5270096 -0.5398607</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a><span class="fu">ggplot</span>(nonnormsample, <span class="fu">aes</span>(x1))<span class="sc">+</span><span class="fu">geom_histogram</span>()<span class="co"># inspect one margin</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
 </div>
-</section>
-<section id="inspecting-data-descriptives" class="slide level2">
-<h2>Inspecting data: descriptives</h2>
+<img data-src="non_normality_files/figure-revealjs/unnamed-chunk-2-1.png" width="960" class="r-stretch"></section>
+<section id="testing-model-fit-under-non-normality" class="slide level2 smaller scrollable">
+<h2>Testing model fit under non-normality</h2>
+<p>Let us fit the data to the model using lavaan with MLM</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a><span class="fu">library</span>(gtsummary)</span>
-<span id="cb3-2"><a></a>mydata <span class="sc">%&gt;%</span> <span class="fu">tbl_summary</span>(<span class="at">by =</span> dlf, <span class="at">missing_text=</span><span class="st">"missing"</span>,</span>
-<span id="cb3-3"><a></a>              <span class="at">statistic =</span> <span class="fu">list</span>(<span class="fu">all_continuous</span>() <span class="sc">~</span> <span class="st">"{mean} ({sd})"</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div id="dnejusazii" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#dnejusazii table {
-  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a>fit <span class="ot">&lt;-</span> <span class="fu">cfa</span>(model, nonnormsample, <span class="at">estimator=</span><span class="st">"MLM"</span>, <span class="at">std.lv=</span>T,</span>
+<span id="cb4-2"><a></a>           <span class="at">test=</span><span class="st">"scaled.shifted"</span>)</span>
+<span id="cb4-3"><a></a><span class="fu">summary</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>lavaan 0.6-19 ended normally after 21 iterations
 
-#dnejusazii thead, #dnejusazii tbody, #dnejusazii tfoot, #dnejusazii tr, #dnejusazii td, #dnejusazii th {
-  border-style: none;
-}
+  Estimator                                         ML
+  Optimization method                           NLMINB
+  Number of model parameters                        13
 
-#dnejusazii p {
-  margin: 0;
-  padding: 0;
-}
+  Number of observations                           500
 
-#dnejusazii .gt_table {
-  display: table;
-  border-collapse: collapse;
-  line-height: normal;
-  margin-left: auto;
-  margin-right: auto;
-  color: #333333;
-  font-size: 16px;
-  font-weight: normal;
-  font-style: normal;
-  background-color: #FFFFFF;
-  width: auto;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #A8A8A8;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #A8A8A8;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-}
+Model Test User Model:
+                                              Standard      Scaled
+  Test Statistic                                 7.826       5.710
+  Degrees of freedom                                 8           8
+  P-value (Chi-square)                           0.451       0.680
+  Scaling correction factor                                  1.371
+    Satorra-Bentler correction                                    
+                                                                  
+  Test Statistic                                 7.826       5.799
+  Degrees of freedom                                 8           8
+  P-value (Chi-square)                           0.451       0.670
+  Scaling correction factor                                  1.426
+  Shift parameter                                            0.311
+    simple second-order correction                                
 
-#dnejusazii .gt_caption {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
+Parameter Estimates:
 
-#dnejusazii .gt_title {
-  color: #333333;
-  font-size: 125%;
-  font-weight: initial;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-color: #FFFFFF;
-  border-bottom-width: 0;
-}
+  Standard errors                           Robust.sem
+  Information                                 Expected
+  Information saturated (h1) model          Structured
 
-#dnejusazii .gt_subtitle {
-  color: #333333;
-  font-size: 85%;
-  font-weight: initial;
-  padding-top: 3px;
-  padding-bottom: 5px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-top-color: #FFFFFF;
-  border-top-width: 0;
-}
+Latent Variables:
+                   Estimate  Std.Err  z-value  P(&gt;|z|)
+  F1 =~                                               
+    x1                1.019    0.090   11.354    0.000
+    x2                0.929    0.111    8.374    0.000
+    x3                0.905    0.116    7.772    0.000
+  F2 =~                                               
+    x4                0.937    0.128    7.330    0.000
+    x5                1.202    0.159    7.568    0.000
+    x6                1.025    0.095   10.825    0.000
 
-#dnejusazii .gt_heading {
-  background-color: #FFFFFF;
-  text-align: center;
-  border-bottom-color: #FFFFFF;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-}
+Covariances:
+                   Estimate  Std.Err  z-value  P(&gt;|z|)
+  F1 ~~                                               
+    F2                0.516    0.058    8.964    0.000
 
-#dnejusazii .gt_bottom_border {
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#dnejusazii .gt_col_headings {
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-}
-
-#dnejusazii .gt_col_heading {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: normal;
-  text-transform: inherit;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: bottom;
-  padding-top: 5px;
-  padding-bottom: 6px;
-  padding-left: 5px;
-  padding-right: 5px;
-  overflow-x: hidden;
-}
-
-#dnejusazii .gt_column_spanner_outer {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: normal;
-  text-transform: inherit;
-  padding-top: 0;
-  padding-bottom: 0;
-  padding-left: 4px;
-  padding-right: 4px;
-}
-
-#dnejusazii .gt_column_spanner_outer:first-child {
-  padding-left: 0;
-}
-
-#dnejusazii .gt_column_spanner_outer:last-child {
-  padding-right: 0;
-}
-
-#dnejusazii .gt_column_spanner {
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  vertical-align: bottom;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  overflow-x: hidden;
-  display: inline-block;
-  width: 100%;
-}
-
-#dnejusazii .gt_spanner_row {
-  border-bottom-style: hidden;
-}
-
-#dnejusazii .gt_group_heading {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: middle;
-  text-align: left;
-}
-
-#dnejusazii .gt_empty_group_heading {
-  padding: 0.5px;
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  vertical-align: middle;
-}
-
-#dnejusazii .gt_from_md > :first-child {
-  margin-top: 0;
-}
-
-#dnejusazii .gt_from_md > :last-child {
-  margin-bottom: 0;
-}
-
-#dnejusazii .gt_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  margin: 10px;
-  border-top-style: solid;
-  border-top-width: 1px;
-  border-top-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: middle;
-  overflow-x: hidden;
-}
-
-#dnejusazii .gt_stub {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-right-style: solid;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#dnejusazii .gt_stub_row_group {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-right-style: solid;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  padding-left: 5px;
-  padding-right: 5px;
-  vertical-align: top;
-}
-
-#dnejusazii .gt_row_group_first td {
-  border-top-width: 2px;
-}
-
-#dnejusazii .gt_row_group_first th {
-  border-top-width: 2px;
-}
-
-#dnejusazii .gt_summary_row {
-  color: #333333;
-  background-color: #FFFFFF;
-  text-transform: inherit;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#dnejusazii .gt_first_summary_row {
-  border-top-style: solid;
-  border-top-color: #D3D3D3;
-}
-
-#dnejusazii .gt_first_summary_row.thick {
-  border-top-width: 2px;
-}
-
-#dnejusazii .gt_last_summary_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#dnejusazii .gt_grand_summary_row {
-  color: #333333;
-  background-color: #FFFFFF;
-  text-transform: inherit;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#dnejusazii .gt_first_grand_summary_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-top-style: double;
-  border-top-width: 6px;
-  border-top-color: #D3D3D3;
-}
-
-#dnejusazii .gt_last_grand_summary_row_top {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-style: double;
-  border-bottom-width: 6px;
-  border-bottom-color: #D3D3D3;
-}
-
-#dnejusazii .gt_striped {
-  background-color: rgba(128, 128, 128, 0.05);
-}
-
-#dnejusazii .gt_table_body {
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#dnejusazii .gt_footnotes {
-  color: #333333;
-  background-color: #FFFFFF;
-  border-bottom-style: none;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-}
-
-#dnejusazii .gt_footnote {
-  margin: 0px;
-  font-size: 90%;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#dnejusazii .gt_sourcenotes {
-  color: #333333;
-  background-color: #FFFFFF;
-  border-bottom-style: none;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-}
-
-#dnejusazii .gt_sourcenote {
-  font-size: 90%;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#dnejusazii .gt_left {
-  text-align: left;
-}
-
-#dnejusazii .gt_center {
-  text-align: center;
-}
-
-#dnejusazii .gt_right {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-#dnejusazii .gt_font_normal {
-  font-weight: normal;
-}
-
-#dnejusazii .gt_font_bold {
-  font-weight: bold;
-}
-
-#dnejusazii .gt_font_italic {
-  font-style: italic;
-}
-
-#dnejusazii .gt_super {
-  font-size: 65%;
-}
-
-#dnejusazii .gt_footnote_marks {
-  font-size: 75%;
-  vertical-align: 0.4em;
-  position: initial;
-}
-
-#dnejusazii .gt_asterisk {
-  font-size: 100%;
-  vertical-align: 0;
-}
-
-#dnejusazii .gt_indent_1 {
-  text-indent: 5px;
-}
-
-#dnejusazii .gt_indent_2 {
-  text-indent: 10px;
-}
-
-#dnejusazii .gt_indent_3 {
-  text-indent: 15px;
-}
-
-#dnejusazii .gt_indent_4 {
-  text-indent: 20px;
-}
-
-#dnejusazii .gt_indent_5 {
-  text-indent: 25px;
-}
-
-#dnejusazii .katex-display {
-  display: inline-flex !important;
-  margin-bottom: 0.75em !important;
-}
-
-#dnejusazii div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
-  height: 0px !important;
-}
-</style>
-
-<table class="gt_table caption-top" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header gt_col_headings">
-<th id="label" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col"><strong>Characteristic</strong></th>
-<th id="stat_1" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>PoorD</strong><br> N = 645<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span></th>
-<th id="stat_2" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>PoorC</strong><br> N = 560<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span></th>
-</tr>
-</thead>
-<tbody class="gt_table_body">
-<tr class="odd">
-<td class="gt_row gt_left" headers="label">lf1</td>
-<td class="gt_row gt_center" headers="stat_1">7.36 (2.93)</td>
-<td class="gt_row gt_center" headers="stat_2">9.42 (1.22)</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;missing</td>
-<td class="gt_row gt_center" headers="stat_1">3</td>
-<td class="gt_row gt_center" headers="stat_2">0</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="label">lf2</td>
-<td class="gt_row gt_center" headers="stat_1">11.6 (5.0)</td>
-<td class="gt_row gt_center" headers="stat_2">12.8 (4.5)</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;missing</td>
-<td class="gt_row gt_center" headers="stat_1">36</td>
-<td class="gt_row gt_center" headers="stat_2">31</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="label">lf3</td>
-<td class="gt_row gt_center" headers="stat_1">15.8 (5.3)</td>
-<td class="gt_row gt_center" headers="stat_2">16.6 (5.1)</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;missing</td>
-<td class="gt_row gt_center" headers="stat_1">55</td>
-<td class="gt_row gt_center" headers="stat_2">49</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="label">se1</td>
-<td class="gt_row gt_center" headers="stat_1">18.3 (3.6)</td>
-<td class="gt_row gt_center" headers="stat_2">20.4 (2.9)</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="label">se2</td>
-<td class="gt_row gt_center" headers="stat_1">17.95 (2.88)</td>
-<td class="gt_row gt_center" headers="stat_2">19.52 (2.52)</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;missing</td>
-<td class="gt_row gt_center" headers="stat_1">33</td>
-<td class="gt_row gt_center" headers="stat_2">29</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="label">se3</td>
-<td class="gt_row gt_center" headers="stat_1">17.71 (2.79)</td>
-<td class="gt_row gt_center" headers="stat_2">19.16 (2.57)</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;missing</td>
-<td class="gt_row gt_center" headers="stat_1">50</td>
-<td class="gt_row gt_center" headers="stat_2">47</td>
-</tr>
-</tbody><tfoot class="gt_footnotes">
-<tr class="even">
-<td colspan="3" class="gt_footnote"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span> Mean (SD)</td>
-</tr>
-</tfoot>
-
-</table>
-
+Variances:
+                   Estimate  Std.Err  z-value  P(&gt;|z|)
+   .x1                0.667    0.129    5.178    0.000
+   .x2                1.094    0.200    5.465    0.000
+   .x3                1.109    0.189    5.860    0.000
+   .x4                1.282    0.274    4.679    0.000
+   .x5                1.160    0.190    6.098    0.000
+   .x6                1.005    0.176    5.722    0.000
+    F1                1.000                           
+    F2                1.000                           </code></pre>
 </div>
 </div>
-</div>
-</section>
-<section id="missing-data" class="slide level2">
-<h2>Missing data!</h2>
+<p>Both SB and scaled-shifted p-values indicates good fit. semTests package reports</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a><span class="fu">library</span>(naniar) <span class="co"># visualize missingness</span></span>
-<span id="cb4-2"><a></a><span class="fu">vis_miss</span>(mydata)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a><span class="fu">library</span>(semTests)<span class="co">#under development</span></span>
+<span id="cb6-2"><a></a><span class="fu">pvalues</span>(fit, <span class="at">tests=</span><span class="fu">c</span>(<span class="st">"sb_ml"</span>, <span class="st">"ss_ml"</span>, <span class="st">"peba4_rls"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    sb_ml     ss_ml peba4_rls 
+0.6797138 0.6697819 0.6732651 </code></pre>
 </div>
-<img data-src="growth_exercise_files/figure-revealjs/unnamed-chunk-4-1.png" width="960" class="r-stretch"><p>Missing data can be categorized into three main types: <strong>MCAR</strong>, <strong>MAR</strong>, and <strong>MNAR</strong>.</p>
-</section>
-<section id="missing-completely-at-random-mcar" class="slide level2">
-<h2>Missing Completely at Random (MCAR)</h2>
-<p>When data are MCAR, missingness is unrelated to both observed and unobserved data, meaning no systematic differences exist between those with and without missing values.</p>
-<p><strong>Example:</strong> Lab samples are lost due to a processing error. MCAR reduces sample size but does not introduce bias. However, it is a strong and often unrealistic assumption.</p>
-</section>
-<section id="missing-at-random-mar" class="slide level2">
-<h2>Missing at Random (MAR)</h2>
-<p>When data are MAR, missingness depends on observed data but not on the missing values themselves.</p>
-<p><strong>Example:</strong> In a depression study, men may be less likely to complete a survey, but missingness is unrelated to depression severity. Complete case analysis may be biased, but adjusting for observed factors (e.g., sex) can correct this.</p>
-<p>The <em>fiml</em> estimator in lavaan is commonly used to handle missingness, under the assumption of R. Full-information means that we do not throw away any data points. Using the default estimator means listwise deletion.</p>
-</section>
-<section id="missing-not-at-random-mnar" class="slide level2">
-<h2>Missing Not at Random (MNAR)</h2>
-<p>When data are MNAR, missingness is related to unobserved data, meaning the reason for missing data is itself unknown.</p>
-<p><strong>Example:</strong> People with severe depression may be less likely to complete a survey. Because the cause of missingness is unmeasured, bias is likely and difficult to correct.</p>
-</section>
-<section id="exercises" class="slide level2">
-<h2>Exercises</h2>
-<ol type="1">
-<li><p>find the correlation matrix for se1-se2-se3 ? hint: <em>cor()</em></p></li>
-<li><p>find the correlation between lf1 and se1? interpret the sign and magnitude</p></li>
-<li><p>what is the effect of <em>dlf</em> on <em>lf1</em>? hint: use <em>lm()</em>. interpret the estimates</p></li>
-<li><p>make a spagettiplot of 25 random students for the growth in <em>se</em></p></li>
-<li><p>estimate a linear growth model (without covariates) for <em>lf</em>.</p></li>
-<li><p>What is the model fit of the growth model? hint: use <em>fitmeasures()</em></p></li>
-<li><p>As in (5) but use <em>estimator=“fiml”</em> to handle missingness. Do the substantive conclusions change?</p></li>
-<li><p>Make histograms for the <em>lf</em> variables. Do the data appear normally distributed?</p></li>
-<li><p>Run the model with covariates: use dlf as predictor for slope and intercept. Interpret the effect of the predictor</p></li>
-<li><p>plot the path diagram of model from exc. 9.</p></li>
-</ol>
+</div>
+<p>Where peba4_rls method was found to outperform SB and scaled-and-shifted.</p>
 
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 
+</div>
+</div>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-foldnes2025improved" class="csl-entry" role="listitem">
+Foldnes, Njål, Jonas Moss, and Steffen Grønneberg. 2025. <span>“Improved Goodness of Fit Procedures for Structural Equation Models.”</span> <em>Structural Equation Modeling: A Multidisciplinary Journal</em> 32 (1): 1–13.
 </div>
 </div>
 </section>

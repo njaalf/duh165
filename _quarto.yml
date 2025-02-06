@@ -19,9 +19,10 @@ website:
           contents: 
             - href: R/growth_reading.rds
               text: reading data
-              contents: 
             - href: data/lundberg.pdf
               text: paper on causal estimands
+            - href: data/improved.pdf
+              text: paper on test statistics
 format:
       html:
         theme:

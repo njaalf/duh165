@@ -1,0 +1,71 @@
+---
+title: "Handling non-normal data"
+bibliography: references.bib
+
+title-slide-attributes:
+    data-background-image: missplot.png
+    data-background-size: stretch
+    data-background-opacity: "0.5"
+    
+format: 
+  revealjs
+editor: source
+execute: 
+  echo: true
+  message: false
+  warning: false
+---
+
+```{r, echo=F}
+library(tidyverse)
+theme_set(theme_minimal())
+```
+
+## Multivariate normality is not normal
+
+- CFA and SEM theory first developed for multivariate normal (MVN) data. The default ML estimator assumes multivariate normality.
+
+- However, data are rarely MVN.
+  - Either we have continuous non-normal data (not often)
+  - Or, we have discrete data (very often)
+    - Likert scales
+    - Sum scores
+    
+## Handling non-normal continuous data
+
+- We can use the MLM estimator and all is good wrt standard errors.
+
+- For model fit $\chi^2$ there are many options. See @foldnes2025improved
+  - Satorra-Bentler scaling is the classic approach
+  - The scaled-and-shifted test is another alternative, it is very conservative  (low power)
+  - Some new approaches (known as pEBA) soon to implemented in lavaan looks promising! 
+  
+## Generating a non-normal dataset
+```{r}
+library(lavaan)
+model <- "F1=~x1+x2+x3; F2=~x4+x5+x6; F1 ~~ start(0.5)*F2"
+set.seed(1)
+nonnormsample <- simulateData(model, skewness = 3, kurtosis=21)
+head(nonnormsample,2)#two first rows
+ggplot(nonnormsample, aes(x1))+geom_histogram()# inspect one margin
+```
+
+## Testing model fit under non-normality
+
+Let us fit the data to the model using lavaan with MLM
+```{r}
+fit <- cfa(model, nonnormsample, estimator="MLM", std.lv=T,
+           test="scaled.shifted")
+summary(fit)
+```
+Both SB and scaled-shifted p-values indicates good fit.
+semTests package reports
+```{r}
+library(semTests)#under development
+pvalues(fit, tests=c("sb_ml", "ss_ml", "peba4_rls"))
+```
+Where peba4_rls method was found to outperform SB and scaled-and-shifted.
+
+
+
+  
