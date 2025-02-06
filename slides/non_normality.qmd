@@ -58,13 +58,146 @@ fit <- cfa(model, nonnormsample, estimator="MLM", std.lv=T,
            test="scaled.shifted")
 summary(fit)
 ```
+
+## semTests pvalue
+
 Both SB and scaled-shifted p-values indicates good fit.
 semTests package reports
 ```{r}
 library(semTests)#under development
-pvalues(fit, tests=c("sb_ml", "ss_ml", "peba4_rls"))
+pvalues(fit, tests=c("sb_ml", "ss_ml", "peba4_rls")) %>% round(3)
 ```
-Where peba4_rls method was found to outperform SB and scaled-and-shifted.
+The peba4_rls method was found to outperform SB and scaled-and-shifted.
+
+*ps* sumscores (a sum of correct answers on a test) may be treated as continuous if reasonably many levels exist (>7)
+
+## What about ordinal-categorical data?
+
+Ongoing discussion: Can we treat ordinal data as continous?
+
+- Well-cited paper answers "yes" if data looks normal and there are more than, say, 5 levels [@rhemtulla2012can]
+
+- However, the picture is more complicated, see [@foldnes2022sensitivity]
+
+- Best advice: Use methods for ordinal-categorical data. But be aware that there is an underlying normality assumption, as next illustrated
+
+
+## Ordinal data interpreted as discretized data
+
+Let us discretize a normal dataset 
+```{r}
+set.seed(1)
+normsample <- simulateData(model)
+thresholds <- c(-2, -1.5, 0, 1)
+ordsample <- sapply(normsample, cut, breaks=c(-Inf, thresholds,Inf), labels=F)
+colnames(ordsample) <- colnames(normsample)
+ggplot(ordsample, aes(x1))+geom_bar()
+```
+## Correlations when continuous 
+
+```{r}
+psych::cor.plot(normsample)
+```
+## Correlations after discretizing are weaker 
+
+```{r}
+psych::cor.plot(ordsample)
+```
+This means that treating ordinal data as continuous will find weaker factor loadings
+
+## Treat data as ordinal: DWLS estimation
+```{r}
+ford <- cfa(model, data=ordsample, ordered=colnames(ordsample), std.lv=T)
+fcont <- cfa(model, data=ordsample,  std.lv=T)
+```
+Standardized factor loadings are larger for DWLS
+```{r}
+standardizedsolution(ford) %>% head(6)
+standardizedsolution(fcont) %>% head(6)
+```
+
+## DWLS comes closer than ML to "original" parameter values
+```{r}
+forig <- cfa(model, normsample, std.lv=T)#true values
+orig <- standardizedsolution(forig)[1:6, "est.std"]
+ord <- standardizedsolution(ford)[1:6, "est.std"]
+cont <- standardizedsolution(fcont)[1:6, "est.std"]
+df <- data.frame(est.std=c(orig, ord, cont), 
+                 method=rep(c("orig", "ord", "cont"), each=6),
+                 parameter=rep(1:6,3))
+
+ggplot(df, aes(parameter, est.std, group=method, color=method))+
+  geom_point()+geom_line()
+```
+## The underlying normality assumption for DWLS
+
+DWLS assumes what we have simulated: That the data comes from discretizing a MVN dataset. But what if the underlying dataset is not normal (and how can we check this?)
+
+```{r}
+ordsample2 <- sapply(nonnormsample, cut, breaks=c(-Inf, thresholds,Inf), labels=F)#not underlying normality
+colnames(ordsample2) <- colnames(normsample)
+ford2 <- cfa(model, data=ordsample2, ordered=colnames(ordsample), std.lv=T)
+fcont2 <- cfa(model, data=ordsample2,  std.lv=T)
+forig <- cfa(model, nonnormsample, std.lv=T)#true values
+orig <- standardizedsolution(forig)[1:6, "est.std"]
+ord <- standardizedsolution(ford2)[1:6, "est.std"]
+cont <- standardizedsolution(fcont2)[1:6, "est.std"]
+df <- data.frame(est.std=c(orig, ord, cont), 
+                 method=rep(c("orig", "ord", "cont"), each=6),
+                 parameter=rep(1:6,3))
+```
+
+Here we have a non-normal continuum that has been discretized.
+We have estimated with DWLS and with ML. 
+
+## There is no clear winner
+
+Both methods perform poorly
+
+```{r}
+ggplot(df, aes(parameter, est.std, group=method, color=method))+
+  geom_point()+geom_line()
+```
+
+There is no way to detect underlying normality of this kind!
+Hence, ordinal data are inherently problematic. 
+But we can at least say that more levels is better (at least 7 levels)
+
+## If ML is chosen, use estimator="MLM"
+
+If you have reasons to use ML estimation (treating data as continuous), request robust standard error (estimator="MLM"),
+and  use pEBA or SB test statistics
+
+## The standard errors are biased with ML
+
+```{r}
+forig <- cfa(model, normsample, std.lv=T)#true values
+ford <- cfa(model, data=ordsample, ordered=colnames(ordsample), std.lv=T)
+fcontml <- cfa(model, data=ordsample, std.lv=T)
+fcontmlm <- cfa(model, data=ordsample, std.lv=T, estimator="MLM")
+orig <- standardizedsolution(forig)[1:6, "se"]
+ord <- standardizedsolution(ford)[1:6, "se"]
+ml <- standardizedsolution(fcontml)[1:6, "se"]
+mlm <- standardizedsolution(fcontmlm)[1:6, "se"]
+
+df <- data.frame(est.std=c(orig, ord, ml, mlm), 
+                 method=rep(c("orig", "ord", "ml", "mlm"), each=6),
+                 parameter=rep(1:6,4))
+
+```
+
+<!-- ## Standar error estimates -->
+
+<!-- ```{r} -->
+<!-- ggplot(df, aes(parameter, est.std, group=method, color=method))+ -->
+<!--   geom_point()+geom_line() -->
+<!-- ``` -->
+
+
+## References
+
+::: {#refs}
+:::
 
 
 
