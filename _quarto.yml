@@ -17,8 +17,8 @@ website:
       contents:
         - section: "Data and papers"
           contents: 
-            - href: data/smartphone_wellbeing.rds
-              text: wellbeing data
+            - href: R/growth_reading.rds
+              text: reading data
               contents: 
             - href: data/lundberg.pdf
               text: paper on causal estimands
