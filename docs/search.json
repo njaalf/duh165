@@ -362,5 +362,12 @@
     "title": "Exercise: real-world growth curves",
     "section": "Exercises",
     "text": "Exercises\n\nfind the correlation matrix for se1-se2-se3 ? hint: cor()\nfind the correlation between lf1 and se1? interpret the sign and magnitude\nwhat is the effect of dlf on lf1? hint: use lm(). interpret the estimates\nmake a spagettiplot of 25 random students for the growth in se\nestimate a linear growth model (without covariates) for lf.\nWhat is the model fit of the growth model? hint: use fitmeasures()\nAs in (5) but use estimator=“fiml” to handle missingness. Do the substantive conclusions change?\nMake histograms for the lf variables. Do the data appear normally distributed?\nRun the model with covariates: use dlf as predictor for slope and intercept. Interpret the effect of the predictor\nplot the path diagram of model from exc. 9."
+  },
+  {
+    "objectID": "kladd.html",
+    "href": "kladd.html",
+    "title": "Day 5 kladd",
+    "section": "",
+    "text": "Her skal jeg kjøre litt R kode for å lære meg ting.\n\nLaste inn pakker og teste at de virker"
   }
 ]
