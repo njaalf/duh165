@@ -1,5 +1,5 @@
 ---
-title: "Friday DUH165-  Growth curves"
+title: "Tuesday DUH165-  Growth curves"
 title-slide-attributes:
     data-background-image: missplot.png
     data-background-size: stretch
