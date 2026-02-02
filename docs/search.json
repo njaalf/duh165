@@ -1,5 +1,131 @@
 [
   {
+    "objectID": "slides/non_normality.html#multivariate-normality-is-not-normal",
+    "href": "slides/non_normality.html#multivariate-normality-is-not-normal",
+    "title": "Handling non-normal data",
+    "section": "Multivariate normality is not normal",
+    "text": "Multivariate normality is not normal\n\nCFA and SEM theory first developed for multivariate normal (MVN) data. The default ML estimator assumes multivariate normality.\nHowever, data are rarely MVN.\n\nEither we have continuous non-normal data (not often)\nOr, we have discrete data (very often)\n\nLikert scales\nSum scores"
+  },
+  {
+    "objectID": "slides/non_normality.html#handling-non-normal-continuous-data",
+    "href": "slides/non_normality.html#handling-non-normal-continuous-data",
+    "title": "Handling non-normal data",
+    "section": "Handling non-normal continuous data",
+    "text": "Handling non-normal continuous data\n\nWe can use the MLM estimator and all is good wrt standard errors.\nFor model fit \\(\\chi^2\\) there are many options. See Foldnes, Moss, and Grønneberg (2025)\n\nSatorra-Bentler scaling is the classic approach\nThe scaled-and-shifted test is another alternative, it is very conservative (low power)\nSome new approaches (known as pEBA) soon to implemented in lavaan looks promising!"
+  },
+  {
+    "objectID": "slides/non_normality.html#generating-a-non-normal-dataset",
+    "href": "slides/non_normality.html#generating-a-non-normal-dataset",
+    "title": "Handling non-normal data",
+    "section": "Generating a non-normal dataset",
+    "text": "Generating a non-normal dataset\n\nlibrary(lavaan)\nmodel &lt;- \"F1=~x1+x2+x3; F2=~x4+x5+x6; F1 ~~ start(0.5)*F2\"\nset.seed(1)\nnonnormsample &lt;- simulateData(model, skewness = 3, kurtosis=21)\nhead(nonnormsample,2)#two first rows\n\n          x1         x2         x3         x4        x5         x6\n1 -0.6231198 0.98570222  0.3642348 -0.4894269 0.1631721  1.0512031\n2 -0.5284359 0.02540388 -0.4231360 -0.9600514 0.5270096 -0.5398607\n\nggplot(nonnormsample, aes(x1))+geom_histogram()# inspect one margin"
+  },
+  {
+    "objectID": "slides/non_normality.html#testing-model-fit-under-non-normality",
+    "href": "slides/non_normality.html#testing-model-fit-under-non-normality",
+    "title": "Handling non-normal data",
+    "section": "Testing model fit under non-normality",
+    "text": "Testing model fit under non-normality\nLet us fit the data to the model using lavaan with MLM\n\nfit &lt;- cfa(model, nonnormsample, estimator=\"MLM\", std.lv=T,\n           test=\"scaled.shifted\")\nsummary(fit)\n\nlavaan 0.6.17 ended normally after 21 iterations\n\n  Estimator                                         ML\n  Optimization method                           NLMINB\n  Number of model parameters                        13\n\n  Number of observations                           500\n\nModel Test User Model:\n                                              Standard      Scaled\n  Test Statistic                                 7.826       5.710\n  Degrees of freedom                                 8           8\n  P-value (Chi-square)                           0.451       0.680\n  Scaling correction factor                                  1.371\n    Satorra-Bentler correction                                    \n                                                                  \n  Test Statistic                                 7.826       5.799\n  Degrees of freedom                                 8           8\n  P-value (Chi-square)                           0.451       0.670\n  Scaling correction factor                                  1.426\n  Shift parameter                                            0.311\n    simple second-order correction                                \n\nParameter Estimates:\n\n  Standard errors                           Robust.sem\n  Information                                 Expected\n  Information saturated (h1) model          Structured\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  F1 =~                                               \n    x1                1.019    0.090   11.354    0.000\n    x2                0.929    0.111    8.374    0.000\n    x3                0.905    0.116    7.772    0.000\n  F2 =~                                               \n    x4                0.937    0.128    7.330    0.000\n    x5                1.202    0.159    7.568    0.000\n    x6                1.025    0.095   10.825    0.000\n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  F1 ~~                                               \n    F2                0.516    0.058    8.964    0.000\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .x1                0.667    0.129    5.178    0.000\n   .x2                1.094    0.200    5.465    0.000\n   .x3                1.109    0.189    5.860    0.000\n   .x4                1.282    0.274    4.679    0.000\n   .x5                1.160    0.190    6.098    0.000\n   .x6                1.005    0.176    5.722    0.000\n    F1                1.000                           \n    F2                1.000"
+  },
+  {
+    "objectID": "slides/non_normality.html#semtests-pvalue",
+    "href": "slides/non_normality.html#semtests-pvalue",
+    "title": "Handling non-normal data",
+    "section": "semTests pvalue",
+    "text": "semTests pvalue\nBoth SB and scaled-shifted p-values indicates good fit. semTests package reports\n\nlibrary(semTests)#under development\npvalues(fit, tests=c(\"sb_ml\", \"ss_ml\", \"peba4_rls\")) %&gt;% round(3)\n\n    sb_ml     ss_ml peba4_rls \n    0.680     0.670     0.673 \n\n\nThe peba4_rls method was found to outperform SB and scaled-and-shifted.\nps sumscores (a sum of correct answers on a test) may be treated as continuous if reasonably many levels exist (&gt;7)"
+  },
+  {
+    "objectID": "slides/non_normality.html#what-about-ordinal-categorical-data",
+    "href": "slides/non_normality.html#what-about-ordinal-categorical-data",
+    "title": "Handling non-normal data",
+    "section": "What about ordinal-categorical data?",
+    "text": "What about ordinal-categorical data?\nOngoing discussion: Can we treat ordinal data as continous?\n\nWell-cited paper answers “yes” if data looks normal and there are more than, say, 5 levels (Rhemtulla, Brosseau-Liard, and Savalei 2012)\nHowever, the picture is more complicated, see (Foldnes and Grønneberg 2022)\nBest advice: Use methods for ordinal-categorical data. But be aware that there is an underlying normality assumption, as next illustrated"
+  },
+  {
+    "objectID": "slides/non_normality.html#ordinal-data-interpreted-as-discretized-data",
+    "href": "slides/non_normality.html#ordinal-data-interpreted-as-discretized-data",
+    "title": "Handling non-normal data",
+    "section": "Ordinal data interpreted as discretized data",
+    "text": "Ordinal data interpreted as discretized data\nLet us discretize a normal dataset\n\nset.seed(1)\nnormsample &lt;- simulateData(model)\nthresholds &lt;- c(-2, -1.5, 0, 1)\nordsample &lt;- sapply(normsample, cut, breaks=c(-Inf, thresholds,Inf), labels=F)\ncolnames(ordsample) &lt;- colnames(normsample)\nggplot(ordsample, aes(x1))+geom_bar()"
+  },
+  {
+    "objectID": "slides/non_normality.html#correlations-when-continuous",
+    "href": "slides/non_normality.html#correlations-when-continuous",
+    "title": "Handling non-normal data",
+    "section": "Correlations when continuous",
+    "text": "Correlations when continuous\n\npsych::cor.plot(normsample)"
+  },
+  {
+    "objectID": "slides/non_normality.html#correlations-after-discretizing-are-weaker",
+    "href": "slides/non_normality.html#correlations-after-discretizing-are-weaker",
+    "title": "Handling non-normal data",
+    "section": "Correlations after discretizing are weaker",
+    "text": "Correlations after discretizing are weaker\n\npsych::cor.plot(ordsample)\n\n\nThis means that treating ordinal data as continuous will find weaker factor loadings"
+  },
+  {
+    "objectID": "slides/non_normality.html#treat-data-as-ordinal-dwls-estimation",
+    "href": "slides/non_normality.html#treat-data-as-ordinal-dwls-estimation",
+    "title": "Handling non-normal data",
+    "section": "Treat data as ordinal: DWLS estimation",
+    "text": "Treat data as ordinal: DWLS estimation\n\nford &lt;- cfa(model, data=ordsample, ordered=colnames(ordsample), std.lv=T)\nfcont &lt;- cfa(model, data=ordsample,  std.lv=T)\n\nStandardized factor loadings are larger for DWLS\n\nstandardizedsolution(ford) %&gt;% head(6)\n\n  lhs op rhs est.std    se      z pvalue ci.lower ci.upper\n1  F1 =~  x1   0.670 0.044 15.113      0    0.583    0.757\n2  F1 =~  x2   0.748 0.042 17.870      0    0.666    0.831\n3  F1 =~  x3   0.655 0.043 15.227      0    0.571    0.739\n4  F2 =~  x4   0.661 0.041 16.266      0    0.582    0.741\n5  F2 =~  x5   0.661 0.037 17.768      0    0.588    0.734\n6  F2 =~  x6   0.811 0.039 20.538      0    0.733    0.888\n\nstandardizedsolution(fcont) %&gt;% head(6)\n\n  lhs op rhs est.std    se      z pvalue ci.lower ci.upper\n1  F1 =~  x1   0.629 0.041 15.466      0    0.549    0.708\n2  F1 =~  x2   0.687 0.040 17.156      0    0.609    0.766\n3  F1 =~  x3   0.637 0.041 15.726      0    0.558    0.717\n4  F2 =~  x4   0.628 0.039 16.319      0    0.553    0.704\n5  F2 =~  x5   0.628 0.039 16.289      0    0.552    0.703\n6  F2 =~  x6   0.767 0.037 20.740      0    0.694    0.839"
+  },
+  {
+    "objectID": "slides/non_normality.html#dwls-comes-closer-than-ml-to-original-parameter-values",
+    "href": "slides/non_normality.html#dwls-comes-closer-than-ml-to-original-parameter-values",
+    "title": "Handling non-normal data",
+    "section": "DWLS comes closer than ML to “original” parameter values",
+    "text": "DWLS comes closer than ML to “original” parameter values\n\nforig &lt;- cfa(model, normsample, std.lv=T)#true values\norig &lt;- standardizedsolution(forig)[1:6, \"est.std\"]\nord &lt;- standardizedsolution(ford)[1:6, \"est.std\"]\ncont &lt;- standardizedsolution(fcont)[1:6, \"est.std\"]\ndf &lt;- data.frame(est.std=c(orig, ord, cont), \n                 method=rep(c(\"orig\", \"ord\", \"cont\"), each=6),\n                 parameter=rep(1:6,3))\n\nggplot(df, aes(parameter, est.std, group=method, color=method))+\n  geom_point()+geom_line()"
+  },
+  {
+    "objectID": "slides/non_normality.html#the-underlying-normality-assumption-for-dwls",
+    "href": "slides/non_normality.html#the-underlying-normality-assumption-for-dwls",
+    "title": "Handling non-normal data",
+    "section": "The underlying normality assumption for DWLS",
+    "text": "The underlying normality assumption for DWLS\nDWLS assumes what we have simulated: That the data comes from discretizing a MVN dataset. But what if the underlying dataset is not normal (and how can we check this?)\n\nordsample2 &lt;- sapply(nonnormsample, cut, breaks=c(-Inf, thresholds,Inf), labels=F)#not underlying normality\ncolnames(ordsample2) &lt;- colnames(normsample)\nford2 &lt;- cfa(model, data=ordsample2, ordered=colnames(ordsample), std.lv=T)\nfcont2 &lt;- cfa(model, data=ordsample2,  std.lv=T)\nforig &lt;- cfa(model, nonnormsample, std.lv=T)#true values\norig &lt;- standardizedsolution(forig)[1:6, \"est.std\"]\nord &lt;- standardizedsolution(ford2)[1:6, \"est.std\"]\ncont &lt;- standardizedsolution(fcont2)[1:6, \"est.std\"]\ndf &lt;- data.frame(est.std=c(orig, ord, cont), \n                 method=rep(c(\"orig\", \"ord\", \"cont\"), each=6),\n                 parameter=rep(1:6,3))\n\nHere we have a non-normal continuum that has been discretized. We have estimated with DWLS and with ML."
+  },
+  {
+    "objectID": "slides/non_normality.html#there-is-no-clear-winner",
+    "href": "slides/non_normality.html#there-is-no-clear-winner",
+    "title": "Handling non-normal data",
+    "section": "There is no clear winner",
+    "text": "There is no clear winner\nBoth methods perform poorly\n\nggplot(df, aes(parameter, est.std, group=method, color=method))+\n  geom_point()+geom_line()\n\n\nThere is no way to detect underlying normality of this kind! Hence, ordinal data are inherently problematic. But we can at least say that more levels is better (at least 7 levels)"
+  },
+  {
+    "objectID": "slides/non_normality.html#if-ml-is-chosen-use-estimatormlm",
+    "href": "slides/non_normality.html#if-ml-is-chosen-use-estimatormlm",
+    "title": "Handling non-normal data",
+    "section": "If ML is chosen, use estimator=“MLM”",
+    "text": "If ML is chosen, use estimator=“MLM”\nIf you have reasons to use ML estimation (treating data as continuous), request robust standard error (estimator=“MLM”), and use pEBA or SB test statistics"
+  },
+  {
+    "objectID": "slides/non_normality.html#the-standard-errors-are-biased-with-ml",
+    "href": "slides/non_normality.html#the-standard-errors-are-biased-with-ml",
+    "title": "Handling non-normal data",
+    "section": "The standard errors are biased with ML",
+    "text": "The standard errors are biased with ML\n\nford &lt;- cfa(model, data=ordsample, ordered=colnames(ordsample), std.lv=T)\nfcontml &lt;- cfa(model, data=ordsample, std.lv=T)\nfcontmlm &lt;- cfa(model, data=ordsample, std.lv=T, estimator=\"MLM\")\nord &lt;- standardizedsolution(ford)[1:6, \"se\"]\nml &lt;- standardizedsolution(fcontml)[1:6, \"se\"]\nmlm &lt;- standardizedsolution(fcontmlm)[1:6, \"se\"]\n\ndf &lt;- data.frame(est.std=c( ord, ml, mlm), \n                 method=rep(c( \"ord\", \"ml\", \"mlm\"), each=6),\n                 parameter=rep(1:6,3))"
+  },
+  {
+    "objectID": "slides/non_normality.html#standard-error-estimates",
+    "href": "slides/non_normality.html#standard-error-estimates",
+    "title": "Handling non-normal data",
+    "section": "Standard error estimates",
+    "text": "Standard error estimates\n\nggplot(df, aes(parameter, est.std, group=method, color=method))+\n  geom_point()+geom_line()"
+  },
+  {
+    "objectID": "slides/non_normality.html#a-digression-reliability",
+    "href": "slides/non_normality.html#a-digression-reliability",
+    "title": "Handling non-normal data",
+    "section": "A digression: Reliability",
+    "text": "A digression: Reliability\nEither cronbachs \\(\\alpha\\) or \\(\\Omega\\), as implemented in the psych package.\n\nlibrary(psych)\nalpha(ordsample[, 1:3])\n\n\nReliability analysis   \nCall: alpha(x = ordsample[, 1:3])\n\n  raw_alpha std.alpha G6(smc) average_r S/N   ase mean   sd median_r\n      0.69      0.69     0.6      0.42 2.2 0.024  3.5 0.94     0.42\n\n    95% confidence boundaries \n         lower alpha upper\nFeldt     0.64  0.69  0.73\nDuhachek  0.64  0.69  0.74\n\n Reliability if an item is dropped:\n   raw_alpha std.alpha G6(smc) average_r S/N alpha se var.r med.r\nx1      0.61      0.61    0.44      0.44 1.6    0.035    NA  0.44\nx2      0.58      0.59    0.41      0.41 1.4    0.037    NA  0.41\nx3      0.59      0.59    0.42      0.42 1.5    0.036    NA  0.42\n\n Item statistics \n     n raw.r std.r r.cor r.drop mean  sd\nx1 500  0.77  0.78  0.59   0.49  3.5 1.2\nx2 500  0.79  0.79  0.62   0.51  3.5 1.2\nx3 500  0.79  0.79  0.61   0.50  3.5 1.2\n\nNon missing response frequency for each item\n      1    2    3    4    5 miss\nx1 0.09 0.07 0.35 0.26 0.23    0\nx2 0.09 0.07 0.33 0.27 0.24    0\nx3 0.11 0.05 0.33 0.25 0.26    0"
+  },
+  {
+    "objectID": "slides/non_normality.html#references",
+    "href": "slides/non_normality.html#references",
+    "title": "Handling non-normal data",
+    "section": "References",
+    "text": "References\n\n\nFoldnes, Njål, and Steffen Grønneberg. 2022. “The Sensitivity of Structural Equation Modeling with Ordinal Data to Underlying Non-Normality and Observed Distributional Forms.” Psychological Methods 27 (4): 541.\n\n\nFoldnes, Njål, Jonas Moss, and Steffen Grønneberg. 2025. “Improved Goodness of Fit Procedures for Structural Equation Models.” Structural Equation Modeling: A Multidisciplinary Journal 32 (1): 1–13.\n\n\nRhemtulla, Mijke, Patricia É Brosseau-Liard, and Victoria Savalei. 2012. “When Can Categorical Variables Be Treated as Continuous? A Comparison of Robust Continuous and Categorical SEM Estimation Methods Under Suboptimal Conditions.” Psychological Methods 17 (3): 354."
+  },
+  {
     "objectID": "slides/growth_intro.html#about-me",
     "href": "slides/growth_intro.html#about-me",
     "title": "Tuesday DUH165- Growth curves",
@@ -74,7 +200,7 @@
     "href": "slides/growth_intro.html#running-the-model-in-lavaan",
     "title": "Tuesday DUH165- Growth curves",
     "section": "Running the model in lavaan",
-    "text": "Running the model in lavaan\nRename variables in syntax and estimate with growth() function.\n\nlavSyntax &lt;- lavSyntax %&gt;% str_replace_all(\"y1\", \"t\")\nfit &lt;- growth(lavSyntax, data=mydata)\nsummary(fit)\n\nlavaan 0.6-20 ended normally after 25 iterations\n\n  Estimator                                         ML\n  Optimization method                           NLMINB\n  Number of model parameters                         9\n\n  Number of observations                           500\n\nModel Test User Model:\n                                                      \n  Test statistic                                 4.593\n  Degrees of freedom                                 5\n  P-value (Chi-square)                           0.468\n\nParameter Estimates:\n\n  Standard errors                             Standard\n  Information                                 Expected\n  Information saturated (h1) model          Structured\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i =~                                                \n    t1                1.000                           \n    t2                1.000                           \n    t3                1.000                           \n    t4                1.000                           \n  s =~                                                \n    t1                0.000                           \n    t2                1.000                           \n    t3                2.000                           \n    t4                3.000                           \n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i ~~                                                \n    s                 0.133    0.033    4.057    0.000\n\nIntercepts:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n    i                 0.523    0.051   10.153    0.000\n    s                 1.026    0.025   40.268    0.000\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .t1                0.475    0.059    7.989    0.000\n   .t2                0.482    0.040   11.994    0.000\n   .t3                0.473    0.047   10.007    0.000\n   .t4                0.545    0.084    6.471    0.000\n    i                 0.989    0.089   11.097    0.000\n    s                 0.224    0.023    9.891    0.000"
+    "text": "Running the model in lavaan\nRename variables in syntax and estimate with growth() function.\n\nlavSyntax &lt;- lavSyntax %&gt;% str_replace_all(\"y1\", \"t\")\nfit &lt;- growth(lavSyntax, data=mydata)\nsummary(fit)\n\nlavaan 0.6.17 ended normally after 25 iterations\n\n  Estimator                                         ML\n  Optimization method                           NLMINB\n  Number of model parameters                         9\n\n  Number of observations                           500\n\nModel Test User Model:\n                                                      \n  Test statistic                                 4.593\n  Degrees of freedom                                 5\n  P-value (Chi-square)                           0.468\n\nParameter Estimates:\n\n  Standard errors                             Standard\n  Information                                 Expected\n  Information saturated (h1) model          Structured\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i =~                                                \n    t1                1.000                           \n    t2                1.000                           \n    t3                1.000                           \n    t4                1.000                           \n  s =~                                                \n    t1                0.000                           \n    t2                1.000                           \n    t3                2.000                           \n    t4                3.000                           \n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i ~~                                                \n    s                 0.133    0.033    4.057    0.000\n\nIntercepts:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n    i                 0.523    0.051   10.153    0.000\n    s                 1.026    0.025   40.268    0.000\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .t1                0.475    0.059    7.989    0.000\n   .t2                0.482    0.040   11.994    0.000\n   .t3                0.473    0.047   10.007    0.000\n   .t4                0.545    0.084    6.471    0.000\n    i                 0.989    0.089   11.097    0.000\n    s                 0.224    0.023    9.891    0.000"
   },
   {
     "objectID": "slides/growth_intro.html#path-model-with-the-semplot-package",
@@ -158,7 +284,7 @@
     "href": "slides/growth_intro.html#running-the-model-in-lavaan-1",
     "title": "Tuesday DUH165- Growth curves",
     "section": "Running the model in lavaan",
-    "text": "Running the model in lavaan\nRename variables in syntax and estimate with growth() function.\n\nlavSyntax &lt;- lavSyntax %&gt;% str_replace_all(\"y1\", \"t\") %&gt;% \n  str_replace_all(\"a3\", \"a\")\nfit &lt;- growth(lavSyntax, data=mydata)\nsummary(fit)\n\nlavaan 0.6-20 ended normally after 29 iterations\n\n  Estimator                                         ML\n  Optimization method                           NLMINB\n  Number of model parameters                        17\n\n  Number of observations                           500\n\nModel Test User Model:\n                                                      \n  Test statistic                                25.786\n  Degrees of freedom                                21\n  P-value (Chi-square)                           0.215\n\nParameter Estimates:\n\n  Standard errors                             Standard\n  Information                                 Expected\n  Information saturated (h1) model          Structured\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i =~                                                \n    t1                1.000                           \n    t2                1.000                           \n    t3                1.000                           \n    t4                1.000                           \n  s =~                                                \n    t1                0.000                           \n    t2                1.000                           \n    t3                2.000                           \n    t4                3.000                           \n\nRegressions:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i ~                                                 \n    x1                0.557    0.054   10.285    0.000\n    x2                0.718    0.055   12.953    0.000\n  s ~                                                 \n    x1                0.264    0.025   10.549    0.000\n    x2                0.473    0.026   18.438    0.000\n  t1 ~                                                \n    a1                0.190    0.044    4.302    0.000\n  t2 ~                                                \n    a2                0.323    0.038    8.433    0.000\n  t3 ~                                                \n    a3                0.344    0.038    9.016    0.000\n  t4 ~                                                \n    a4                0.303    0.050    6.004    0.000\n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n .i ~~                                                \n   .s                 0.055    0.035    1.588    0.112\n\nIntercepts:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .i                 0.570    0.054   10.477    0.000\n   .s                 1.010    0.025   40.112    0.000\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .t1                0.509    0.068    7.513    0.000\n   .t2                0.597    0.048   12.348    0.000\n   .t3                0.481    0.049    9.858    0.000\n   .t4                0.579    0.088    6.606    0.000\n   .i                 1.074    0.098   10.922    0.000\n   .s                 0.201    0.022    9.092    0.000"
+    "text": "Running the model in lavaan\nRename variables in syntax and estimate with growth() function.\n\nlavSyntax &lt;- lavSyntax %&gt;% str_replace_all(\"y1\", \"t\") %&gt;% \n  str_replace_all(\"a3\", \"a\")\nfit &lt;- growth(lavSyntax, data=mydata)\nsummary(fit)\n\nlavaan 0.6.17 ended normally after 29 iterations\n\n  Estimator                                         ML\n  Optimization method                           NLMINB\n  Number of model parameters                        17\n\n  Number of observations                           500\n\nModel Test User Model:\n                                                      \n  Test statistic                                25.786\n  Degrees of freedom                                21\n  P-value (Chi-square)                           0.215\n\nParameter Estimates:\n\n  Standard errors                             Standard\n  Information                                 Expected\n  Information saturated (h1) model          Structured\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i =~                                                \n    t1                1.000                           \n    t2                1.000                           \n    t3                1.000                           \n    t4                1.000                           \n  s =~                                                \n    t1                0.000                           \n    t2                1.000                           \n    t3                2.000                           \n    t4                3.000                           \n\nRegressions:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  i ~                                                 \n    x1                0.557    0.054   10.285    0.000\n    x2                0.718    0.055   12.953    0.000\n  s ~                                                 \n    x1                0.264    0.025   10.549    0.000\n    x2                0.473    0.026   18.438    0.000\n  t1 ~                                                \n    a1                0.190    0.044    4.302    0.000\n  t2 ~                                                \n    a2                0.323    0.038    8.433    0.000\n  t3 ~                                                \n    a3                0.344    0.038    9.016    0.000\n  t4 ~                                                \n    a4                0.303    0.050    6.004    0.000\n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n .i ~~                                                \n   .s                 0.055    0.035    1.588    0.112\n\nIntercepts:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .i                 0.570    0.054   10.477    0.000\n   .s                 1.010    0.025   40.112    0.000\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .t1                0.509    0.068    7.513    0.000\n   .t2                0.597    0.048   12.348    0.000\n   .t3                0.481    0.049    9.858    0.000\n   .t4                0.579    0.088    6.606    0.000\n   .i                 1.074    0.098   10.922    0.000\n   .s                 0.201    0.022    9.092    0.000"
   },
   {
     "objectID": "slides/growth_intro.html#path-model",
@@ -166,153 +292,6 @@
     "title": "Tuesday DUH165- Growth curves",
     "section": "path model",
     "text": "path model\n\nsemPaths(fit, what=\"est\")"
-  },
-  {
-    "objectID": "slides/causality.html#what-is-your-estimand",
-    "href": "slides/causality.html#what-is-your-estimand",
-    "title": "Two good papers on causal estimands and causality",
-    "section": "What is your estimand?",
-    "text": "What is your estimand?\n\n(Lundberg, Johnson, and Stewart 2021) focuses on the target quantity of interest, instead of the statistical analysis\nFirst, we must define the thing we are estimating!\nIn an empirical paper, the author should first define the theoretical estimand prior and outside of any statistical model\nThen link this theoretical estimand to an empirical estimand (a coefficient in a statistical model), explaining why the empirical estimand is informative"
-  },
-  {
-    "objectID": "slides/causality.html#causal-inference",
-    "href": "slides/causality.html#causal-inference",
-    "title": "Two good papers on causal estimands and causality",
-    "section": "Causal inference",
-    "text": "Causal inference\nBailey, D.H., Jung, A.J., Beltz, A.M. et al. Causal inference on human behaviour. Nat Hum Behav 8, 1448–1459 (2024). https://doi.org/10.1038/s41562-024-01939-z\n\n\n\n\n\n\n\n\nLundberg, Ian, Rebecca Johnson, and Brandon M Stewart. 2021. “What Is Your Estimand? Defining the Target Quantity Connects Statistical Evidence to Theory.” American Sociological Review 86 (3): 532–65."
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Duh 165 Applied statistics - Day 2",
-    "section": "",
-    "text": "Growth modeling in R and more\n📖 Introduction to growth modeling in R\n📖 Exercise: Working on a real dataset\n📖 On non-normal and ordinal-categorical data\n📖 Some remarks on causal estimands"
-  },
-  {
-    "objectID": "slides/non_normality.html#multivariate-normality-is-not-normal",
-    "href": "slides/non_normality.html#multivariate-normality-is-not-normal",
-    "title": "Handling non-normal data",
-    "section": "Multivariate normality is not normal",
-    "text": "Multivariate normality is not normal\n\nCFA and SEM theory first developed for multivariate normal (MVN) data. The default ML estimator assumes multivariate normality.\nHowever, data are rarely MVN.\n\nEither we have continuous non-normal data (not often)\nOr, we have discrete data (very often)\n\nLikert scales\nSum scores"
-  },
-  {
-    "objectID": "slides/non_normality.html#handling-non-normal-continuous-data",
-    "href": "slides/non_normality.html#handling-non-normal-continuous-data",
-    "title": "Handling non-normal data",
-    "section": "Handling non-normal continuous data",
-    "text": "Handling non-normal continuous data\n\nWe can use the MLM estimator and all is good wrt standard errors.\nFor model fit \\(\\chi^2\\) there are many options. See Foldnes, Moss, and Grønneberg (2025)\n\nSatorra-Bentler scaling is the classic approach\nThe scaled-and-shifted test is another alternative, it is very conservative (low power)\nSome new approaches (known as pEBA) soon to implemented in lavaan looks promising!"
-  },
-  {
-    "objectID": "slides/non_normality.html#generating-a-non-normal-dataset",
-    "href": "slides/non_normality.html#generating-a-non-normal-dataset",
-    "title": "Handling non-normal data",
-    "section": "Generating a non-normal dataset",
-    "text": "Generating a non-normal dataset\n\nlibrary(lavaan)\nmodel &lt;- \"F1=~x1+x2+x3; F2=~x4+x5+x6; F1 ~~ start(0.5)*F2\"\nset.seed(1)\nnonnormsample &lt;- simulateData(model, skewness = 3, kurtosis=21)\nhead(nonnormsample,2)#two first rows\n\n         x1          x2         x3         x4         x5         x6\n1 -1.178276 -0.05257745 -0.5166098 -0.7455313 -0.6172609 -0.2170063\n2 -0.459853  0.68662076 -0.3243986 -0.8095351  0.6693386 -0.3052672\n\nggplot(nonnormsample, aes(x1))+geom_histogram()# inspect one margin"
-  },
-  {
-    "objectID": "slides/non_normality.html#testing-model-fit-under-non-normality",
-    "href": "slides/non_normality.html#testing-model-fit-under-non-normality",
-    "title": "Handling non-normal data",
-    "section": "Testing model fit under non-normality",
-    "text": "Testing model fit under non-normality\nLet us fit the data to the model using lavaan with MLM\n\nfit &lt;- cfa(model, nonnormsample, estimator=\"MLM\", std.lv=T,\n           test=\"scaled.shifted\")\nsummary(fit)\n\nlavaan 0.6-20 ended normally after 20 iterations\n\n  Estimator                                         ML\n  Optimization method                           NLMINB\n  Number of model parameters                        13\n\n  Number of observations                           500\n\nModel Test User Model:\n                                              Standard      Scaled\n  Test Statistic                                19.138       8.481\n  Degrees of freedom                                 8           8\n  P-value (Chi-square)                           0.014       0.388\n  Scaling correction factor                                  2.257\n    Satorra-Bentler correction                                    \n                                                                  \n  Test Statistic                                19.138       8.391\n  Degrees of freedom                                 8           8\n  P-value (Chi-square)                           0.014       0.396\n  Scaling correction factor                                  2.776\n  Shift parameter                                            1.497\n    simple second-order correction                                \n\nParameter Estimates:\n\n  Standard errors                           Robust.sem\n  Information                                 Expected\n  Information saturated (h1) model          Structured\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  F1 =~                                               \n    x1                1.048    0.139    7.562    0.000\n    x2                1.263    0.179    7.066    0.000\n    x3                1.120    0.134    8.340    0.000\n  F2 =~                                               \n    x4                1.105    0.195    5.657    0.000\n    x5                0.848    0.114    7.462    0.000\n    x6                1.107    0.167    6.625    0.000\n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  F1 ~~                                               \n    F2                0.514    0.088    5.857    0.000\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .x1                0.904    0.182    4.977    0.000\n   .x2                1.214    0.333    3.648    0.000\n   .x3                1.181    0.217    5.435    0.000\n   .x4                0.932    0.201    4.628    0.000\n   .x5                0.987    0.157    6.281    0.000\n   .x6                1.127    0.227    4.964    0.000\n    F1                1.000                           \n    F2                1.000"
-  },
-  {
-    "objectID": "slides/non_normality.html#semtests-pvalue",
-    "href": "slides/non_normality.html#semtests-pvalue",
-    "title": "Handling non-normal data",
-    "section": "semTests pvalue",
-    "text": "semTests pvalue\nBoth SB and scaled-shifted p-values indicates good fit. semTests package reports\n\nlibrary(semTests)#under development\npvalues(fit, tests=c(\"sb_ml\", \"ss_ml\", \"peba4_rls\")) %&gt;% round(3)\n\n    sb_ml     ss_ml peba4_rls \n    0.388     0.396     0.379 \n\n\nThe peba4_rls method was found to outperform SB and scaled-and-shifted.\nps sumscores (a sum of correct answers on a test) may be treated as continuous if reasonably many levels exist (&gt;7)"
-  },
-  {
-    "objectID": "slides/non_normality.html#what-about-ordinal-categorical-data",
-    "href": "slides/non_normality.html#what-about-ordinal-categorical-data",
-    "title": "Handling non-normal data",
-    "section": "What about ordinal-categorical data?",
-    "text": "What about ordinal-categorical data?\nOngoing discussion: Can we treat ordinal data as continous?\n\nWell-cited paper answers “yes” if data looks normal and there are more than, say, 5 levels (Rhemtulla, Brosseau-Liard, and Savalei 2012)\nHowever, the picture is more complicated, see (Foldnes and Grønneberg 2022)\nBest advice: Use methods for ordinal-categorical data. But be aware that there is an underlying normality assumption, as next illustrated"
-  },
-  {
-    "objectID": "slides/non_normality.html#ordinal-data-interpreted-as-discretized-data",
-    "href": "slides/non_normality.html#ordinal-data-interpreted-as-discretized-data",
-    "title": "Handling non-normal data",
-    "section": "Ordinal data interpreted as discretized data",
-    "text": "Ordinal data interpreted as discretized data\nLet us discretize a normal dataset\n\nset.seed(1)\nnormsample &lt;- simulateData(model)\nthresholds &lt;- c(-2, -1.5, 0, 1)\nordsample &lt;- sapply(normsample, cut, breaks=c(-Inf, thresholds,Inf), labels=F)\ncolnames(ordsample) &lt;- colnames(normsample)\nggplot(ordsample, aes(x1))+geom_bar()"
-  },
-  {
-    "objectID": "slides/non_normality.html#correlations-when-continuous",
-    "href": "slides/non_normality.html#correlations-when-continuous",
-    "title": "Handling non-normal data",
-    "section": "Correlations when continuous",
-    "text": "Correlations when continuous\n\npsych::cor.plot(normsample)"
-  },
-  {
-    "objectID": "slides/non_normality.html#correlations-after-discretizing-are-weaker",
-    "href": "slides/non_normality.html#correlations-after-discretizing-are-weaker",
-    "title": "Handling non-normal data",
-    "section": "Correlations after discretizing are weaker",
-    "text": "Correlations after discretizing are weaker\n\npsych::cor.plot(ordsample)\n\n\nThis means that treating ordinal data as continuous will find weaker factor loadings"
-  },
-  {
-    "objectID": "slides/non_normality.html#treat-data-as-ordinal-dwls-estimation",
-    "href": "slides/non_normality.html#treat-data-as-ordinal-dwls-estimation",
-    "title": "Handling non-normal data",
-    "section": "Treat data as ordinal: DWLS estimation",
-    "text": "Treat data as ordinal: DWLS estimation\n\nford &lt;- cfa(model, data=ordsample, ordered=colnames(ordsample), std.lv=T)\nfcont &lt;- cfa(model, data=ordsample,  std.lv=T)\n\nStandardized factor loadings are larger for DWLS\n\nstandardizedsolution(ford) %&gt;% head(6)\n\n  lhs op rhs est.std    se      z pvalue ci.lower ci.upper\n1  F1 =~  x1   0.728 0.042 17.173      0    0.645    0.811\n2  F1 =~  x2   0.680 0.043 15.648      0    0.595    0.765\n3  F1 =~  x3   0.699 0.042 16.711      0    0.617    0.781\n4  F2 =~  x4   0.748 0.040 18.812      0    0.670    0.826\n5  F2 =~  x5   0.718 0.041 17.616      0    0.638    0.798\n6  F2 =~  x6   0.639 0.040 16.059      0    0.561    0.717\n\nstandardizedsolution(fcont) %&gt;% head(6)\n\n  lhs op rhs est.std    se      z pvalue ci.lower ci.upper\n1  F1 =~  x1   0.667 0.039 17.202      0    0.591    0.743\n2  F1 =~  x2   0.649 0.039 16.616      0    0.572    0.725\n3  F1 =~  x3   0.681 0.039 17.629      0    0.605    0.757\n4  F2 =~  x4   0.697 0.039 17.999      0    0.621    0.773\n5  F2 =~  x5   0.684 0.039 17.625      0    0.608    0.761\n6  F2 =~  x6   0.608 0.040 15.234      0    0.530    0.687"
-  },
-  {
-    "objectID": "slides/non_normality.html#dwls-comes-closer-than-ml-to-original-parameter-values",
-    "href": "slides/non_normality.html#dwls-comes-closer-than-ml-to-original-parameter-values",
-    "title": "Handling non-normal data",
-    "section": "DWLS comes closer than ML to “original” parameter values",
-    "text": "DWLS comes closer than ML to “original” parameter values\n\nforig &lt;- cfa(model, normsample, std.lv=T)#true values\norig &lt;- standardizedsolution(forig)[1:6, \"est.std\"]\nord &lt;- standardizedsolution(ford)[1:6, \"est.std\"]\ncont &lt;- standardizedsolution(fcont)[1:6, \"est.std\"]\ndf &lt;- data.frame(est.std=c(orig, ord, cont), \n                 method=rep(c(\"orig\", \"ord\", \"cont\"), each=6),\n                 parameter=rep(1:6,3))\n\nggplot(df, aes(parameter, est.std, group=method, color=method))+\n  geom_point()+geom_line()"
-  },
-  {
-    "objectID": "slides/non_normality.html#the-underlying-normality-assumption-for-dwls",
-    "href": "slides/non_normality.html#the-underlying-normality-assumption-for-dwls",
-    "title": "Handling non-normal data",
-    "section": "The underlying normality assumption for DWLS",
-    "text": "The underlying normality assumption for DWLS\nDWLS assumes what we have simulated: That the data comes from discretizing a MVN dataset. But what if the underlying dataset is not normal (and how can we check this?)\n\nordsample2 &lt;- sapply(nonnormsample, cut, breaks=c(-Inf, thresholds,Inf), labels=F)#not underlying normality\ncolnames(ordsample2) &lt;- colnames(normsample)\nford2 &lt;- cfa(model, data=ordsample2, ordered=colnames(ordsample), std.lv=T)\nfcont2 &lt;- cfa(model, data=ordsample2,  std.lv=T)\nforig &lt;- cfa(model, nonnormsample, std.lv=T)#true values\norig &lt;- standardizedsolution(forig)[1:6, \"est.std\"]\nord &lt;- standardizedsolution(ford2)[1:6, \"est.std\"]\ncont &lt;- standardizedsolution(fcont2)[1:6, \"est.std\"]\ndf &lt;- data.frame(est.std=c(orig, ord, cont), \n                 method=rep(c(\"orig\", \"ord\", \"cont\"), each=6),\n                 parameter=rep(1:6,3))\n\nHere we have a non-normal continuum that has been discretized. We have estimated with DWLS and with ML."
-  },
-  {
-    "objectID": "slides/non_normality.html#there-is-no-clear-winner",
-    "href": "slides/non_normality.html#there-is-no-clear-winner",
-    "title": "Handling non-normal data",
-    "section": "There is no clear winner",
-    "text": "There is no clear winner\nBoth methods perform poorly\n\nggplot(df, aes(parameter, est.std, group=method, color=method))+\n  geom_point()+geom_line()\n\n\nThere is no way to detect underlying normality of this kind! Hence, ordinal data are inherently problematic. But we can at least say that more levels is better (at least 7 levels)"
-  },
-  {
-    "objectID": "slides/non_normality.html#if-ml-is-chosen-use-estimatormlm",
-    "href": "slides/non_normality.html#if-ml-is-chosen-use-estimatormlm",
-    "title": "Handling non-normal data",
-    "section": "If ML is chosen, use estimator=“MLM”",
-    "text": "If ML is chosen, use estimator=“MLM”\nIf you have reasons to use ML estimation (treating data as continuous), request robust standard error (estimator=“MLM”), and use pEBA or SB test statistics"
-  },
-  {
-    "objectID": "slides/non_normality.html#the-standard-errors-are-biased-with-ml",
-    "href": "slides/non_normality.html#the-standard-errors-are-biased-with-ml",
-    "title": "Handling non-normal data",
-    "section": "The standard errors are biased with ML",
-    "text": "The standard errors are biased with ML\n\nford &lt;- cfa(model, data=ordsample, ordered=colnames(ordsample), std.lv=T)\nfcontml &lt;- cfa(model, data=ordsample, std.lv=T)\nfcontmlm &lt;- cfa(model, data=ordsample, std.lv=T, estimator=\"MLM\")\nord &lt;- standardizedsolution(ford)[1:6, \"se\"]\nml &lt;- standardizedsolution(fcontml)[1:6, \"se\"]\nmlm &lt;- standardizedsolution(fcontmlm)[1:6, \"se\"]\n\ndf &lt;- data.frame(est.std=c( ord, ml, mlm), \n                 method=rep(c( \"ord\", \"ml\", \"mlm\"), each=6),\n                 parameter=rep(1:6,3))"
-  },
-  {
-    "objectID": "slides/non_normality.html#standard-error-estimates",
-    "href": "slides/non_normality.html#standard-error-estimates",
-    "title": "Handling non-normal data",
-    "section": "Standard error estimates",
-    "text": "Standard error estimates\n\nggplot(df, aes(parameter, est.std, group=method, color=method))+\n  geom_point()+geom_line()"
-  },
-  {
-    "objectID": "slides/non_normality.html#a-digression-reliability",
-    "href": "slides/non_normality.html#a-digression-reliability",
-    "title": "Handling non-normal data",
-    "section": "A digression: Reliability",
-    "text": "A digression: Reliability\nEither cronbachs \\(\\alpha\\) or \\(\\Omega\\), as implemented in the psych package.\n\nlibrary(psych)\nalpha(ordsample[, 1:3])\n\n\nReliability analysis   \nCall: alpha(x = ordsample[, 1:3])\n\n  raw_alpha std.alpha G6(smc) average_r S/N   ase mean   sd median_r\n       0.7       0.7    0.61      0.44 2.4 0.023  3.5 0.93     0.45\n\n    95% confidence boundaries \n         lower alpha upper\nFeldt     0.66   0.7  0.75\nDuhachek  0.66   0.7  0.75\n\n Reliability if an item is dropped:\n   raw_alpha std.alpha G6(smc) average_r S/N alpha se var.r med.r\nx1      0.62      0.62    0.45      0.45 1.6    0.034    NA  0.45\nx2      0.63      0.63    0.46      0.46 1.7    0.033    NA  0.46\nx3      0.59      0.59    0.42      0.42 1.5    0.036    NA  0.42\n\n Item statistics \n     n raw.r std.r r.cor r.drop mean  sd\nx1 500  0.79  0.79  0.62   0.52  3.6 1.2\nx2 500  0.78  0.79  0.61   0.51  3.5 1.1\nx3 500  0.80  0.80  0.64   0.54  3.5 1.2\n\nNon missing response frequency for each item\n      1    2    3    4    5 miss\nx1 0.09 0.04 0.36 0.26 0.25    0\nx2 0.07 0.08 0.33 0.29 0.23    0\nx3 0.09 0.07 0.35 0.26 0.24    0"
-  },
-  {
-    "objectID": "slides/non_normality.html#references",
-    "href": "slides/non_normality.html#references",
-    "title": "Handling non-normal data",
-    "section": "References",
-    "text": "References\n\n\nFoldnes, Njål, and Steffen Grønneberg. 2022. “The Sensitivity of Structural Equation Modeling with Ordinal Data to Underlying Non-Normality and Observed Distributional Forms.” Psychological Methods 27 (4): 541.\n\n\nFoldnes, Njål, Jonas Moss, and Steffen Grønneberg. 2025. “Improved Goodness of Fit Procedures for Structural Equation Models.” Structural Equation Modeling: A Multidisciplinary Journal 32 (1): 1–13.\n\n\nRhemtulla, Mijke, Patricia É Brosseau-Liard, and Victoria Savalei. 2012. “When Can Categorical Variables Be Treated as Continuous? A Comparison of Robust Continuous and Categorical SEM Estimation Methods Under Suboptimal Conditions.” Psychological Methods 17 (3): 354."
   },
   {
     "objectID": "slides/growth_exercise.html#studying-reading-and-motivational-development-in-two-risk-groups",
@@ -362,5 +341,201 @@
     "title": "Exercise: real-world growth curves",
     "section": "Exercises",
     "text": "Exercises\n\nfind the correlation matrix for se1-se2-se3 ? hint: cor()\nfind the correlation between lf1 and se1? interpret the sign and magnitude\nwhat is the effect of dlf on lf1? hint: use lm(). interpret the estimates\nmake a spagettiplot of 25 random students for the growth in se\nestimate a linear growth model (without covariates) for lf.\nWhat is the model fit of the growth model? hint: use fitmeasures()\nAs in (5) but use estimator=“fiml” to handle missingness. Do the substantive conclusions change?\nMake histograms for the lf variables. Do the data appear normally distributed?\nRun the model with covariates: use dlf as predictor for slope and intercept. Interpret the effect of the predictor\nplot the path diagram of model from exc. 9."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Duh 165 Applied statistics - Day 2",
+    "section": "",
+    "text": "R basics\n📖 Introduction to R and various tools for productivity\n\n\nGrowth modeling in R\n📖 Introduction to growth modeling in R\n📖 Exercise: Working on a real dataset\n📖 On non-normal and ordinal-categorical data\n📖 Some remarks on causal estimands"
+  },
+  {
+    "objectID": "slides/causality.html#what-is-your-estimand",
+    "href": "slides/causality.html#what-is-your-estimand",
+    "title": "Two good papers on causal estimands and causality",
+    "section": "What is your estimand?",
+    "text": "What is your estimand?\n\n(Lundberg, Johnson, and Stewart 2021) focuses on the target quantity of interest, instead of the statistical analysis\nFirst, we must define the thing we are estimating!\nIn an empirical paper, the author should first define the theoretical estimand prior and outside of any statistical model\nThen link this theoretical estimand to an empirical estimand (a coefficient in a statistical model), explaining why the empirical estimand is informative"
+  },
+  {
+    "objectID": "slides/causality.html#causal-inference",
+    "href": "slides/causality.html#causal-inference",
+    "title": "Two good papers on causal estimands and causality",
+    "section": "Causal inference",
+    "text": "Causal inference\nBailey, D.H., Jung, A.J., Beltz, A.M. et al. Causal inference on human behaviour. Nat Hum Behav 8, 1448–1459 (2024). https://doi.org/10.1038/s41562-024-01939-z\n\n\n\n\nLundberg, Ian, Rebecca Johnson, and Brandon M Stewart. 2021. “What Is Your Estimand? Defining the Target Quantity Connects Statistical Evidence to Theory.” American Sociological Review 86 (3): 532–65."
+  },
+  {
+    "objectID": "slides/r_intro.html#useful-tools-for-doing-research",
+    "href": "slides/r_intro.html#useful-tools-for-doing-research",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Useful tools for doing research",
+    "text": "Useful tools for doing research\n\nRstudio to do statistics\nLatex, e.g., Overleaf to write APA7 compliant papers\nUse Google scholar to collect references in bibtex format\nUse e.g. xtable package in R to generate Tables (Or AI LLMs)\nUse ggplot package to generate graphics\n\nLet us use the dataset “bigfive.csv” in this session to illustrate.\n-Download dataset and open in Rstudio, using File&gt;Import dataset -how many variables? how many observations? -run summary() on the dataframe - look at the missing data structure: naniar package, vis_miss() function"
+  },
+  {
+    "objectID": "slides/r_intro.html#inspecting-data-descriptives-using-gtsummary-package",
+    "href": "slides/r_intro.html#inspecting-data-descriptives-using-gtsummary-package",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Inspecting data: descriptives using gtsummary package",
+    "text": "Inspecting data: descriptives using gtsummary package\n\nmydata &lt;- read.csv(\"../data/bigfive.csv\")\nlibrary(gtsummary)\nmydata %&gt;% tbl_summary(by = gender, missing_text=\"missing\",\n              statistic = list(all_continuous() ~ \"{mean} ({sd})\")) \n\n\n\n\n\n\n\n\n\n\n\n\nCharacteristic\nF\nN = 2481\nM\nN = 2521\n\n\n\n\nx1\n0.86 (1.04)\n-0.68 (1.01)\n\n\n    missing\n3\n3\n\n\nx2\n0.86 (0.99)\n-0.87 (1.02)\n\n\n    missing\n4\n4\n\n\nx3\n0.91 (1.03)\n-1.00 (1.05)\n\n\n    missing\n1\n1\n\n\nx4\n0.18 (1.21)\n-0.12 (1.21)\n\n\n    missing\n3\n3\n\n\nx5\n0.10 (1.63)\n-0.18 (1.54)\n\n\n    missing\n1\n3\n\n\nx6\n0.27 (1.49)\n-0.36 (1.41)\n\n\n    missing\n5\n0\n\n\nx7\n0.12 (1.16)\n-0.06 (1.21)\n\n\n    missing\n0\n2\n\n\nx8\n0.29 (1.58)\n-0.27 (1.66)\n\n\n    missing\n3\n5\n\n\nx9\n0.24 (1.33)\n-0.16 (1.37)\n\n\n    missing\n5\n2\n\n\nx10\n-0.03 (1.71)\n-0.21 (1.37)\n\n\n    missing\n1\n1\n\n\nx11\n0.01 (1.10)\n-0.07 (1.08)\n\n\n    missing\n1\n2\n\n\nx12\n0.14 (1.30)\n-0.17 (1.27)\n\n\n    missing\n2\n4\n\n\nx13\n0.03 (1.25)\n0.15 (1.24)\n\n\n    missing\n2\n4\n\n\nx14\n-0.04 (1.37)\n0.15 (1.60)\n\n\n    missing\n2\n2\n\n\nx15\n-0.16 (1.63)\n0.12 (1.65)\n\n\n    missing\n3\n2\n\n\n\n1 Mean (SD)"
+  },
+  {
+    "objectID": "slides/r_intro.html#missing-data",
+    "href": "slides/r_intro.html#missing-data",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Missing data!",
+    "text": "Missing data!\n\nmydata &lt;- mydata[, 1:15]#drop gender\nlibrary(naniar) # visualize missingness\nvis_miss(mydata)\n\n\nMissing data can be categorized into three main types: MCAR, MAR, and MNAR."
+  },
+  {
+    "objectID": "slides/r_intro.html#missing-completely-at-random-mcar",
+    "href": "slides/r_intro.html#missing-completely-at-random-mcar",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Missing Completely at Random (MCAR)",
+    "text": "Missing Completely at Random (MCAR)\nWhen data are MCAR, missingness is unrelated to both observed and unobserved data, meaning no systematic differences exist between those with and without missing values.\nExample: Lab samples are lost due to a processing error. MCAR reduces sample size but does not introduce bias. However, it is a strong and often unrealistic assumption."
+  },
+  {
+    "objectID": "slides/r_intro.html#missing-at-random-mar",
+    "href": "slides/r_intro.html#missing-at-random-mar",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Missing at Random (MAR)",
+    "text": "Missing at Random (MAR)\nWhen data are MAR, missingness depends on observed data but not on the missing values themselves.\nExample: In a depression study, men may be less likely to complete a survey, but missingness is unrelated to depression severity. Complete case analysis may be biased, but adjusting for observed factors (e.g., sex) can correct this.\nThe fiml estimator in lavaan is commonly used to handle missingness, under the assumption of R. Full-information means that we do not throw away any data points. Using the default estimator means listwise deletion."
+  },
+  {
+    "objectID": "slides/r_intro.html#missing-not-at-random-mnar",
+    "href": "slides/r_intro.html#missing-not-at-random-mnar",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Missing Not at Random (MNAR)",
+    "text": "Missing Not at Random (MNAR)\nWhen data are MNAR, missingness is related to unobserved data, meaning the reason for missing data is itself unknown.\nExample: People with severe depression may be less likely to complete a survey. Because the cause of missingness is unmeasured, bias is likely and difficult to correct."
+  },
+  {
+    "objectID": "slides/r_intro.html#look-at-the-distributions-all-15-at-once-normally-distributed-all-very-unrealistic",
+    "href": "slides/r_intro.html#look-at-the-distributions-all-15-at-once-normally-distributed-all-very-unrealistic",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Look at the distributions all 15 at once, normally distributed all (very unrealistic!)",
+    "text": "Look at the distributions all 15 at once, normally distributed all (very unrealistic!)\n\nlibrary(tidyverse)# a bundle of packages, with ggplot included\n#wide to long format. PIPING operator!\nlong &lt;- mydata %&gt;% pivot_longer(everything())\nggplot(long, aes(x = value)) +\n  geom_histogram() +\n  facet_wrap(~ name)"
+  },
+  {
+    "objectID": "slides/r_intro.html#the-correlation-matrix-has-patterns..",
+    "href": "slides/r_intro.html#the-correlation-matrix-has-patterns..",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "The correlation matrix has patterns..",
+    "text": "The correlation matrix has patterns..\n\npsych::cor.plot(mydata)"
+  },
+  {
+    "objectID": "slides/r_intro.html#the-five-factor-model",
+    "href": "slides/r_intro.html#the-five-factor-model",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "The Five factor Model",
+    "text": "The Five factor Model\n\nmodel &lt;- \"\nF1 =~ x1 + x2 + x3\nF2 =~ x4 + x5 + x6\nF3 =~ x7 + x8 + x9\nF4 =~ x10 + x11 + x12\nF5 =~ x13 + x14 + x15\"\n\nlibrary(psych)# package with many psychometric functions\n\n#Reliability, i.e.,  cronbachs alpha\npsych::alpha(mydata[, 1:3])[[1]]# three first indicators\n\n raw_alpha std.alpha  G6(smc) average_r      S/N        ase        mean\n 0.7178031 0.7186151 0.630705 0.4598343 2.553851 0.02176864 0.004900656\n       sd median_r\n 1.075566 0.449559"
+  },
+  {
+    "objectID": "slides/r_intro.html#let-us-fit-the-model-using-default-estimator-ml",
+    "href": "slides/r_intro.html#let-us-fit-the-model-using-default-estimator-ml",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Let us fit the model using default estimator “ML”",
+    "text": "Let us fit the model using default estimator “ML”\n\nlibrary(lavaan)\nf1 &lt;- cfa(model, data=mydata)\nsummary(f1)\n\nlavaan 0.6.17 ended normally after 48 iterations\n\n  Estimator                                         ML\n  Optimization method                           NLMINB\n  Number of model parameters                        40\n\n                                                  Used       Total\n  Number of observations                           430         500\n\nModel Test User Model:\n                                                      \n  Test statistic                                62.560\n  Degrees of freedom                                80\n  P-value (Chi-square)                           0.925\n\nParameter Estimates:\n\n  Standard errors                             Standard\n  Information                                 Expected\n  Information saturated (h1) model          Structured\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  F1 =~                                               \n    x1                1.000                           \n    x2                1.139    0.120    9.517    0.000\n    x3                1.202    0.126    9.528    0.000\n  F2 =~                                               \n    x4                1.000                           \n    x5                1.460    0.154    9.491    0.000\n    x6                1.416    0.149    9.509    0.000\n  F3 =~                                               \n    x7                1.000                           \n    x8                2.156    0.274    7.875    0.000\n    x9                1.412    0.173    8.172    0.000\n  F4 =~                                               \n    x10               1.000                           \n    x11               0.486    0.070    6.927    0.000\n    x12               0.656    0.091    7.173    0.000\n  F5 =~                                               \n    x13               1.000                           \n    x14               1.731    0.189    9.170    0.000\n    x15               2.168    0.245    8.848    0.000\n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  F1 ~~                                               \n    F2                0.185    0.045    4.080    0.000\n    F3                0.158    0.038    4.114    0.000\n    F4                0.142    0.066    2.169    0.030\n    F5               -0.057    0.033   -1.709    0.088\n  F2 ~~                                               \n    F3                0.009    0.030    0.299    0.765\n    F4                0.283    0.065    4.332    0.000\n    F5               -0.124    0.034   -3.657    0.000\n  F3 ~~                                               \n    F4                0.005    0.047    0.102    0.919\n    F5               -0.114    0.029   -3.904    0.000\n  F4 ~~                                               \n    F5               -0.106    0.049   -2.165    0.030\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .x1                0.934    0.088   10.594    0.000\n   .x2                0.948    0.101    9.393    0.000\n   .x3                0.998    0.110    9.099    0.000\n   .x4                0.927    0.082   11.313    0.000\n   .x5                1.276    0.137    9.291    0.000\n   .x6                1.039    0.122    8.522    0.000\n   .x7                1.028    0.081   12.626    0.000\n   .x8                0.912    0.184    4.954    0.000\n   .x9                1.123    0.108   10.364    0.000\n   .x10               0.961    0.181    5.296    0.000\n   .x11               0.898    0.075   12.052    0.000\n   .x12               1.111    0.106   10.437    0.000\n   .x13               1.146    0.086   13.277    0.000\n   .x14               1.015    0.121    8.418    0.000\n   .x15               0.764    0.162    4.712    0.000\n    F1                0.661    0.107    6.165    0.000\n    F2                0.564    0.095    5.928    0.000\n    F3                0.367    0.076    4.798    0.000\n    F4                1.340    0.221    6.057    0.000\n    F5                0.398    0.080    5.007    0.000"
+  },
+  {
+    "objectID": "slides/r_intro.html#fiml-uses-all-of-the-data-no-listwise-deletion",
+    "href": "slides/r_intro.html#fiml-uses-all-of-the-data-no-listwise-deletion",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "FIML uses all of the data (no listwise deletion)",
+    "text": "FIML uses all of the data (no listwise deletion)\n\nlibrary(lavaan)\nf2 &lt;- cfa(model, data=mydata, missing=\"FIML\")\nsummary(f2)\n\nlavaan 0.6.17 ended normally after 49 iterations\n\n  Estimator                                         ML\n  Optimization method                           NLMINB\n  Number of model parameters                        55\n\n  Number of observations                           500\n  Number of missing patterns                        20\n\nModel Test User Model:\n                                                      \n  Test statistic                                65.003\n  Degrees of freedom                                80\n  P-value (Chi-square)                           0.888\n\nParameter Estimates:\n\n  Standard errors                             Standard\n  Information                                 Observed\n  Observed information based on                Hessian\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  F1 =~                                               \n    x1                1.000                           \n    x2                1.093    0.107   10.252    0.000\n    x3                1.222    0.123    9.917    0.000\n  F2 =~                                               \n    x4                1.000                           \n    x5                1.480    0.142   10.426    0.000\n    x6                1.435    0.143   10.032    0.000\n  F3 =~                                               \n    x7                1.000                           \n    x8                2.083    0.248    8.392    0.000\n    x9                1.326    0.143    9.252    0.000\n  F4 =~                                               \n    x10               1.000                           \n    x11               0.455    0.064    7.101    0.000\n    x12               0.639    0.086    7.432    0.000\n  F5 =~                                               \n    x13               1.000                           \n    x14               1.688    0.169   10.000    0.000\n    x15               2.062    0.213    9.696    0.000\n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  F1 ~~                                               \n    F2                0.163    0.041    3.959    0.000\n    F3                0.169    0.038    4.438    0.000\n    F4                0.154    0.063    2.440    0.015\n    F5               -0.035    0.032   -1.091    0.275\n  F2 ~~                                               \n    F3               -0.008    0.029   -0.284    0.776\n    F4                0.266    0.060    4.428    0.000\n    F5               -0.128    0.033   -3.921    0.000\n  F3 ~~                                               \n    F4                0.002    0.047    0.038    0.970\n    F5               -0.106    0.028   -3.783    0.000\n  F4 ~~                                               \n    F5               -0.110    0.049   -2.263    0.024\n\nIntercepts:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .x1                0.081    0.057    1.421    0.155\n   .x2               -0.013    0.060   -0.214    0.831\n   .x3               -0.050    0.063   -0.786    0.432\n   .x4                0.029    0.055    0.530    0.596\n   .x5               -0.038    0.071   -0.536    0.592\n   .x6               -0.042    0.066   -0.626    0.532\n   .x7                0.029    0.053    0.550    0.582\n   .x8                0.009    0.074    0.120    0.905\n   .x9                0.047    0.061    0.765    0.445\n   .x10              -0.116    0.069   -1.675    0.094\n   .x11              -0.032    0.049   -0.663    0.507\n   .x12              -0.014    0.058   -0.239    0.811\n   .x13               0.086    0.056    1.531    0.126\n   .x14               0.055    0.067    0.829    0.407\n   .x15              -0.020    0.074   -0.270    0.788\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .x1                0.949    0.085   11.145    0.000\n   .x2                0.945    0.091   10.354    0.000\n   .x3                0.985    0.106    9.262    0.000\n   .x4                0.914    0.076   12.040    0.000\n   .x5                1.285    0.132    9.713    0.000\n   .x6                1.029    0.118    8.712    0.000\n   .x7                1.000    0.077   12.941    0.000\n   .x8                0.902    0.179    5.035    0.000\n   .x9                1.137    0.101   11.245    0.000\n   .x10               1.007    0.182    5.526    0.000\n   .x11               0.900    0.068   13.160    0.000\n   .x12               1.095    0.099   11.034    0.000\n   .x13               1.127    0.080   14.010    0.000\n   .x14               0.994    0.115    8.617    0.000\n   .x15               0.862    0.153    5.634    0.000\n    F1                0.677    0.103    6.564    0.000\n    F2                0.565    0.089    6.375    0.000\n    F3                0.412    0.077    5.327    0.000\n    F4                1.375    0.219    6.282    0.000\n    F5                0.431    0.078    5.542    0.000"
+  },
+  {
+    "objectID": "slides/r_intro.html#latent-variable-models-vs-meansum-scores.",
+    "href": "slides/r_intro.html#latent-variable-models-vs-meansum-scores.",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Latent variable models vs mean/sum scores.",
+    "text": "Latent variable models vs mean/sum scores.\nLet us estimate the correlation betweeen F1 and F2 in the CFA model\n\nstandardizedsolution(f1)[36,]# look at correlation F1 and F2\n\n   lhs op rhs est.std    se     z pvalue ci.lower ci.upper\n36  F1 ~~  F2   0.304 0.063 4.844      0    0.181    0.427\n\n\nThe naive and much simpler approach is to use sum/mean scores\n\ns1 &lt;- rowMeans(mydata[, 1:3], na.rm=T)\ns2 &lt;- rowMeans(mydata[, 4:6], na.rm=T)\nplot(s1, s2)\n\ncor(s1,s2)\n\n[1] 0.1828778\n\n\nThe association is attenuated using naiv sum scores!"
+  },
+  {
+    "objectID": "slides/r_intro.html#goodness-of-fit-how-well-does-the-model-fit-the-data",
+    "href": "slides/r_intro.html#goodness-of-fit-how-well-does-the-model-fit-the-data",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Goodness-of-fit: How well does the model fit the data?",
+    "text": "Goodness-of-fit: How well does the model fit the data?\nThe strict test for model fit is the chi-square test. The null hypothesis: The model is correctly specified. The alternative hypothesis: The model is misspecified!\n\nfitmeasures(f1, c(\"chisq\", \"pvalue\", \"df\"))\n\n chisq pvalue     df \n62.560  0.925 80.000 \n\n\npvalue is just the upper tail in a chi-square distribution\n\npchisq(62.56, df = 80, lower.tail = FALSE)\n\n[1] 0.9251002\n\n\nThe null is not rejected! A very well-fitting model (totally unrealistic)"
+  },
+  {
+    "objectID": "slides/r_intro.html#degrees-of-freedom-in-latent-variable-models",
+    "href": "slides/r_intro.html#degrees-of-freedom-in-latent-variable-models",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Degrees of freedom in latent variable models",
+    "text": "Degrees of freedom in latent variable models\nDegrees: The number of variances and covariances among the 15 observed indicators, minus the number of free model parameters.\n\nThere are 15*16/2=120 variances/covariances\nThere are 25 factor loadings, 15 residual variances, and 56/2=15 latent variances/covariances.\nTotal number of free parameters is 10+15+15=40\nDF = 120-40=80"
+  },
+  {
+    "objectID": "slides/r_intro.html#the-p-value",
+    "href": "slides/r_intro.html#the-p-value",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "The p-value",
+    "text": "The p-value"
+  },
+  {
+    "objectID": "slides/r_intro.html#what-to-do-with-non-normal-data",
+    "href": "slides/r_intro.html#what-to-do-with-non-normal-data",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "What to do with non-normal data?",
+    "text": "What to do with non-normal data?\n\nData is seldom normal (either skewed, or ordinal in nature- Likert data).\nWe then need a scaled chi-square test, and robust standard errors. The classical way is to use “MLM” estimator. Gives robust standard errors and a scaled Satorra-Bentler statistic.\n\nExercises:\n\nDownload and open the dataset bigfive_nonnormal.cvs\ncheck skewness and kurtosis on the marginals using psych::skew, and psych::kurtosi\nEstimate the model using estimator=“MLM” in cfa() function"
+  },
+  {
+    "objectID": "slides/r_intro.html#recent-findings-concerning-the-chi-square-test-normal-data",
+    "href": "slides/r_intro.html#recent-findings-concerning-the-chi-square-test-normal-data",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Recent findings concerning the chi-square test: Normal data",
+    "text": "Recent findings concerning the chi-square test: Normal data\nNormal data: The default in mplus and lavaan is the ML chi-square. A much better fit statistic is Brownes residual-based statistic. See Foldnes, N., Moss, J., & Grønneberg, S. (2025). Improved Goodness of Fit Procedures for Structural Equation Models. Structural Equation Modeling. Available in package semTests:\n\nsemTests::pvalues(f1, tests=c(\"std_rls\"))\n\n  std_rls \n0.9390634"
+  },
+  {
+    "objectID": "slides/r_intro.html#recent-findings-concerning-the-chi-square-test-non-normal-data",
+    "href": "slides/r_intro.html#recent-findings-concerning-the-chi-square-test-non-normal-data",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Recent findings concerning the chi-square test: Non-normal data",
+    "text": "Recent findings concerning the chi-square test: Non-normal data\n\nNon-normal data. The much used Satorra-Bentler test is outperformed by newer test statistics available in package semTests\n\n\nlibrary(semTests)\nskeweddata &lt;- read.csv(\"../data/bigfive_nonnormal.csv\")\nf &lt;- cfa(model, skeweddata, estimator=\"MLM\")\nfitmeasures(f, \"pvalue.robust\")\n\nnumeric(0)\n\nsemTests::pvalues(f1)#peba4_rls is the overall winner in an upcoming BRM paper!\n\npeba4_rls \n0.9185683"
+  },
+  {
+    "objectID": "slides/r_intro.html#a-real-world-dataset",
+    "href": "slides/r_intro.html#a-real-world-dataset",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "A real-world dataset",
+    "text": "A real-world dataset\nMore often than not, the chi-square test will reject the model.\nA real-world dataset: bfi in psych package\n\nf &lt;- cfa(\"E=~E1+E2+E3+E4+E5\", bfi, estimator=\"MLM\")\nfitmeasures(f, c(\"chisq\", \"pvalue\", \"df\"))\n\n chisq pvalue     df \n86.601  0.000  5.000 \n\n\nClearly, the model is misspecified! But can it still be used?"
+  },
+  {
+    "objectID": "slides/r_intro.html#fit-indices",
+    "href": "slides/r_intro.html#fit-indices",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Fit indices",
+    "text": "Fit indices\nThen we have “tests” of “approximate fit”. These are fit indices and are not statistically motivated, but involve “rules of thumb”. Papers typically cite Hu&Bentler 1999 or some textbook for cutoffs.\n-RMSEA (should be below .08? or .05?) -CFI -SRMR\n\nfitmeasures(f, c(\"rmsea.robust\", \"cfi.robust\", \"srmr\"))\n\nrmsea.robust   cfi.robust         srmr \n       0.077        0.973        0.030"
+  },
+  {
+    "objectID": "slides/r_intro.html#what-about-likert-data-this-is-the-most-frequent-type-of-dataset",
+    "href": "slides/r_intro.html#what-about-likert-data-this-is-the-most-frequent-type-of-dataset",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "What about Likert data (this is the most frequent type of dataset)",
+    "text": "What about Likert data (this is the most frequent type of dataset)\nLet us discretize the data into 1-5 scale Likert data\n\nlikert &lt;- sapply(mydata, cut, breaks=c(-Inf, -1, -.5, 0, 1, Inf), labels=F) #chop into discrete values\nlikert &lt;- data.frame(likert)\nhead(likert)\n\n  x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15\n1  5  4  5  4  5  4  2  1  1   1   5   2   5   4   5\n2  4  4  4  4  2  5  5  4  1   2   5   5   1   1   1\n3  5  4  1  1  1  1  1  4  4   2   2   2   1   3   5\n4  3  5  4  4  1  1  1  1  2   1   3   3   5   2   3\n5  1  3  2  1  1  1  2  1  2   5   4   2   4   5   5\n6  3  2  3  4  4  5  3  1  4   1   4   3   4   3   5"
+  },
+  {
+    "objectID": "slides/r_intro.html#option-1-treating-data-as-continuous",
+    "href": "slides/r_intro.html#option-1-treating-data-as-continuous",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Option 1: Treating data as continuous",
+    "text": "Option 1: Treating data as continuous\n\nfcont &lt;- cfa(model, likert, estimator=\"MLM\")#needed for Likert data\nsummary(fcont)\n\nlavaan 0.6.17 ended normally after 56 iterations\n\n  Estimator                                         ML\n  Optimization method                           NLMINB\n  Number of model parameters                        40\n\n                                                  Used       Total\n  Number of observations                           430         500\n\nModel Test User Model:\n                                              Standard      Scaled\n  Test Statistic                                63.435      63.793\n  Degrees of freedom                                80          80\n  P-value (Chi-square)                           0.913       0.908\n  Scaling correction factor                                  0.994\n    Satorra-Bentler correction                                    \n\nParameter Estimates:\n\n  Standard errors                           Robust.sem\n  Information                                 Expected\n  Information saturated (h1) model          Structured\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  F1 =~                                               \n    x1                1.000                           \n    x2                1.190    0.147    8.112    0.000\n    x3                1.160    0.134    8.678    0.000\n  F2 =~                                               \n    x4                1.000                           \n    x5                1.264    0.148    8.554    0.000\n    x6                1.165    0.137    8.531    0.000\n  F3 =~                                               \n    x7                1.000                           \n    x8                1.596    0.220    7.270    0.000\n    x9                1.234    0.167    7.384    0.000\n  F4 =~                                               \n    x10               1.000                           \n    x11               0.645    0.096    6.713    0.000\n    x12               0.872    0.126    6.946    0.000\n  F5 =~                                               \n    x13               1.000                           \n    x14               1.566    0.196    7.986    0.000\n    x15               1.917    0.255    7.529    0.000\n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  F1 ~~                                               \n    F2                0.224    0.054    4.149    0.000\n    F3                0.186    0.052    3.580    0.000\n    F4                0.180    0.067    2.707    0.007\n    F5               -0.066    0.040   -1.660    0.097\n  F2 ~~                                               \n    F3                0.011    0.044    0.239    0.811\n    F4                0.295    0.069    4.284    0.000\n    F5               -0.135    0.042   -3.181    0.001\n  F3 ~~                                               \n    F4               -0.002    0.054   -0.035    0.972\n    F5               -0.153    0.040   -3.805    0.000\n  F4 ~~                                               \n    F5               -0.105    0.050   -2.092    0.036\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .x1                1.326    0.119   11.158    0.000\n   .x2                1.225    0.144    8.511    0.000\n   .x3                1.311    0.136    9.611    0.000\n   .x4                1.316    0.108   12.158    0.000\n   .x5                1.304    0.155    8.419    0.000\n   .x6                1.336    0.140    9.511    0.000\n   .x7                1.576    0.114   13.763    0.000\n   .x8                1.176    0.186    6.312    0.000\n   .x9                1.394    0.143    9.715    0.000\n   .x10               1.227    0.167    7.352    0.000\n   .x11               1.457    0.104   13.988    0.000\n   .x12               1.330    0.144    9.238    0.000\n   .x13               1.671    0.105   15.980    0.000\n   .x14               1.270    0.148    8.559    0.000\n   .x15               0.929    0.182    5.109    0.000\n    F1                0.708    0.125    5.661    0.000\n    F2                0.715    0.120    5.980    0.000\n    F3                0.527    0.114    4.641    0.000\n    F4                1.052    0.177    5.940    0.000\n    F5                0.440    0.098    4.473    0.000"
+  },
+  {
+    "objectID": "slides/r_intro.html#option-2-treating-data-as-ordinal",
+    "href": "slides/r_intro.html#option-2-treating-data-as-ordinal",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Option 2: Treating data as ordinal",
+    "text": "Option 2: Treating data as ordinal\n\nford &lt;- cfa(model, likert, ordered=TRUE)#needed for Likert data\nsummary(ford)\n\nlavaan 0.6.17 ended normally after 47 iterations\n\n  Estimator                                       DWLS\n  Optimization method                           NLMINB\n  Number of model parameters                        85\n\n                                                  Used       Total\n  Number of observations                           430         500\n\nModel Test User Model:\n                                              Standard      Scaled\n  Test Statistic                                45.692      68.825\n  Degrees of freedom                                80          80\n  P-value (Chi-square)                           0.999       0.809\n  Scaling correction factor                                  0.847\n  Shift parameter                                           14.864\n    simple second-order correction                                \n\nParameter Estimates:\n\n  Parameterization                               Delta\n  Standard errors                           Robust.sem\n  Information                                 Expected\n  Information saturated (h1) model        Unstructured\n\nLatent Variables:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  F1 =~                                               \n    x1                1.000                           \n    x2                1.117    0.126    8.853    0.000\n    x3                1.059    0.114    9.248    0.000\n  F2 =~                                               \n    x4                1.000                           \n    x5                1.136    0.136    8.358    0.000\n    x6                1.218    0.140    8.712    0.000\n  F3 =~                                               \n    x7                1.000                           \n    x8                1.445    0.178    8.123    0.000\n    x9                1.116    0.136    8.179    0.000\n  F4 =~                                               \n    x10               1.000                           \n    x11               0.732    0.113    6.494    0.000\n    x12               0.964    0.140    6.892    0.000\n  F5 =~                                               \n    x13               1.000                           \n    x14               1.346    0.154    8.729    0.000\n    x15               1.640    0.200    8.211    0.000\n\nCovariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n  F1 ~~                                               \n    F2                0.126    0.029    4.302    0.000\n    F3                0.116    0.029    3.948    0.000\n    F4                0.095    0.035    2.733    0.006\n    F5               -0.044    0.024   -1.808    0.071\n  F2 ~~                                               \n    F3                0.011    0.025    0.430    0.667\n    F4                0.149    0.034    4.447    0.000\n    F5               -0.081    0.024   -3.352    0.001\n  F3 ~~                                               \n    F4               -0.006    0.029   -0.218    0.827\n    F5               -0.093    0.023   -3.942    0.000\n  F4 ~~                                               \n    F5               -0.067    0.028   -2.425    0.015\n\nThresholds:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n    x1|t1            -0.867    0.070  -12.464    0.000\n    x1|t2            -0.518    0.064   -8.146    0.000\n    x1|t3            -0.058    0.061   -0.963    0.335\n    x1|t4             0.730    0.067   10.942    0.000\n    x2|t1            -0.708    0.066  -10.667    0.000\n    x2|t2            -0.388    0.062   -6.245    0.000\n    x2|t3            -0.052    0.061   -0.867    0.386\n    x2|t4             0.769    0.067   11.396    0.000\n    x3|t1            -0.686    0.066  -10.391    0.000\n    x3|t2            -0.339    0.062   -5.481    0.000\n    x3|t3             0.000    0.061    0.000    1.000\n    x3|t4             0.761    0.067   11.305    0.000\n    x4|t1            -0.801    0.068  -11.756    0.000\n    x4|t2            -0.446    0.063   -7.103    0.000\n    x4|t3             0.023    0.061    0.385    0.700\n    x4|t4             0.842    0.069   12.201    0.000\n    x5|t1            -0.621    0.065   -9.556    0.000\n    x5|t2            -0.284    0.061   -4.618    0.000\n    x5|t3             0.029    0.061    0.482    0.630\n    x5|t4             0.649    0.065    9.928    0.000\n    x6|t1            -0.656    0.065  -10.021    0.000\n    x6|t2            -0.290    0.061   -4.714    0.000\n    x6|t3             0.105    0.061    1.734    0.083\n    x6|t4             0.730    0.067   10.942    0.000\n    x7|t1            -0.785    0.068  -11.576    0.000\n    x7|t2            -0.363    0.062   -5.863    0.000\n    x7|t3             0.047    0.061    0.771    0.441\n    x7|t4             0.809    0.068   11.845    0.000\n    x8|t1            -0.586    0.064   -9.088    0.000\n    x8|t2            -0.296    0.061   -4.810    0.000\n    x8|t3             0.017    0.061    0.289    0.773\n    x8|t4             0.606    0.065    9.369    0.000\n    x9|t1            -0.793    0.068  -11.666    0.000\n    x9|t2            -0.363    0.062   -5.863    0.000\n    x9|t3             0.000    0.061    0.000    1.000\n    x9|t4             0.700    0.066   10.575    0.000\n    x10|t1           -0.642    0.065   -9.835    0.000\n    x10|t2           -0.235    0.061   -3.850    0.000\n    x10|t3            0.076    0.061    1.252    0.210\n    x10|t4            0.817    0.068   11.935    0.000\n    x11|t1           -0.884    0.070  -12.639    0.000\n    x11|t2           -0.388    0.062   -6.245    0.000\n    x11|t3            0.035    0.061    0.578    0.563\n    x11|t4            0.955    0.072   13.322    0.000\n    x12|t1           -0.801    0.068  -11.756    0.000\n    x12|t2           -0.339    0.062   -5.481    0.000\n    x12|t3            0.029    0.061    0.482    0.630\n    x12|t4            0.777    0.068   11.486    0.000\n    x13|t1           -0.785    0.068  -11.576    0.000\n    x13|t2           -0.426    0.063   -6.818    0.000\n    x13|t3           -0.023    0.061   -0.385    0.700\n    x13|t4            0.785    0.068   11.576    0.000\n    x14|t1           -0.730    0.067  -10.942    0.000\n    x14|t2           -0.414    0.062   -6.627    0.000\n    x14|t3           -0.082    0.061   -1.349    0.177\n    x14|t4            0.586    0.064    9.088    0.000\n    x15|t1           -0.586    0.064   -9.088    0.000\n    x15|t2           -0.345    0.062   -5.576    0.000\n    x15|t3           -0.023    0.061   -0.385    0.700\n    x15|t4            0.565    0.064    8.806    0.000\n\nVariances:\n                   Estimate  Std.Err  z-value  P(&gt;|z|)\n   .x1                0.579                           \n   .x2                0.475                           \n   .x3                0.528                           \n   .x4                0.638                           \n   .x5                0.533                           \n   .x6                0.463                           \n   .x7                0.689                           \n   .x8                0.352                           \n   .x9                0.613                           \n   .x10               0.521                           \n   .x11               0.744                           \n   .x12               0.555                           \n   .x13               0.729                           \n   .x14               0.509                           \n   .x15               0.271                           \n    F1                0.421    0.066    6.422    0.000\n    F2                0.362    0.060    6.012    0.000\n    F3                0.311    0.058    5.383    0.000\n    F4                0.479    0.082    5.867    0.000\n    F5                0.271    0.053    5.091    0.000"
+  },
+  {
+    "objectID": "slides/r_intro.html#which-is-the-best-option",
+    "href": "slides/r_intro.html#which-is-the-best-option",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "which is the best option?",
+    "text": "which is the best option?\n\nLikert scale data is a very hard challenge to CFA/SEM.\nIf the underlying distribution which has been discretized is multivariate normal, then ordered=TRUE should be used.\nBut this rarely holds, as discnorm::bootTest() will show.\nThe best thing is to do both ways, and hope that the substantive conclusions are similar\nIf many indicators, one option is to parcel: make sum scores of subsets of indicators and use these as indicators. Often done in big-five research\n\nFoldnes, N., & Grønneberg, S. (2022). The sensitivity of structural equation modeling with ordinal data to underlying non-normality and observed distributional forms. Psychological Methods"
+  },
+  {
+    "objectID": "slides/r_intro.html#exercises",
+    "href": "slides/r_intro.html#exercises",
+    "title": "Part 1: R, Rstudio and other tools",
+    "section": "Exercises",
+    "text": "Exercises\n\nfind the correlation between F2 and F5 in the CFA. And what is the correlation using mean scores for F2 and F5? Is the mean score correlation attenuated wrt the factor correlation?\nA smaller model is considered: It contains F1 F2 and F3 (9 indicators). Try to calculate the number of covariances and variances in the 9 indicators. And calculate the number of free parameters. What is the df?\nVerify your df calculations by running the F1-F2-F3 model in lavaan."
   }
 ]

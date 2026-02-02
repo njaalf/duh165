@@ -1,0 +1,320 @@
+---
+title: "Part 1: R, Rstudio and other tools"
+title-slide-attributes:
+    data-background-image: missplot.png
+    data-background-size: stretch
+    data-background-opacity: "0.5"
+    
+format: 
+  revealjs
+editor: source
+execute: 
+  echo: true
+  message: false
+  warning: false
+---
+
+```{r, echo=F}
+library(tidyverse)
+theme_set(theme_minimal())
+
+```
+
+# Rstudio intro
+
+## Useful tools for doing research
+
+-   Rstudio to do statistics 
+-   Latex, e.g., Overleaf to write APA7 compliant papers
+  - Use Google scholar to collect references in bibtex format
+  - Use e.g. *xtable* package in R to generate Tables (Or AI LLMs)
+  - Use *ggplot* package to generate graphics
+  
+Let us use the dataset "bigfive.csv" in this session to illustrate.
+
+  -Download dataset and open in Rstudio, using *File>Import dataset*
+  -how many variables? how many observations?
+  -run *summary()* on the dataframe
+  - look at the missing data structure: *naniar* package, *vis_miss()* function 
+
+## Inspecting data: descriptives using gtsummary package
+
+```{r}
+mydata <- read.csv("../data/bigfive.csv")
+library(gtsummary)
+mydata %>% tbl_summary(by = gender, missing_text="missing",
+              statistic = list(all_continuous() ~ "{mean} ({sd})")) 
+```
+
+## Missing data!
+
+```{r}
+mydata <- mydata[, 1:15]#drop gender
+library(naniar) # visualize missingness
+vis_miss(mydata)
+```
+
+Missing data can be categorized into three main types: **MCAR**, **MAR**, and **MNAR**.
+
+## Missing Completely at Random (MCAR)
+
+When data are MCAR, missingness is unrelated to both observed and unobserved data, meaning no systematic differences exist between those with and without missing values.
+
+**Example:** Lab samples are lost due to a processing error. MCAR reduces sample size but does not introduce bias. However, it is a strong and often unrealistic assumption.
+
+## Missing at Random (MAR)
+
+When data are MAR, missingness depends on observed data but not on the missing values themselves.
+
+**Example:** In a depression study, men may be less likely to complete a survey, but missingness is unrelated to depression severity. Complete case analysis may be biased, but adjusting for observed factors (e.g., sex) can correct this.
+
+The *fiml* estimator in lavaan is commonly used to handle missingness, under the assumption of R. Full-information means that we do not throw away any data points. Using the default estimator means listwise deletion.
+
+## Missing Not at Random (MNAR)
+
+When data are MNAR, missingness is related to unobserved data, meaning the reason for missing data is itself unknown.
+
+**Example:** People with severe depression may be less likely to complete a survey. Because the cause of missingness is unmeasured, bias is likely and difficult to correct.
+
+## Look at the distributions all 15 at once, normally distributed all (very unrealistic!)
+
+
+```{r}
+library(tidyverse)# a bundle of packages, with ggplot included
+#wide to long format. PIPING operator!
+long <- mydata %>% pivot_longer(everything())
+ggplot(long, aes(x = value)) +
+  geom_histogram() +
+  facet_wrap(~ name) 
+```
+
+
+
+
+# Confirmatory Factor Analysis
+
+## The correlation matrix has patterns..
+
+```{r}
+psych::cor.plot(mydata)
+```
+
+
+## The Five factor Model 
+
+```{r}
+model <- "
+F1 =~ x1 + x2 + x3
+F2 =~ x4 + x5 + x6
+F3 =~ x7 + x8 + x9
+F4 =~ x10 + x11 + x12
+F5 =~ x13 + x14 + x15"
+
+library(psych)# package with many psychometric functions
+
+#Reliability, i.e.,  cronbachs alpha
+psych::alpha(mydata[, 1:3])[[1]]# three first indicators
+
+```
+
+## Let us fit the model using default estimator "ML"
+
+```{r}
+library(lavaan)
+f1 <- cfa(model, data=mydata)
+summary(f1)
+
+```
+
+## FIML uses all of the data (no listwise deletion)
+
+```{r}
+library(lavaan)
+f2 <- cfa(model, data=mydata, missing="FIML")
+summary(f2)
+
+```
+
+## Latent variable models vs mean/sum scores. 
+
+Let us estimate the correlation betweeen F1 and F2 in the CFA model
+```{r}
+standardizedsolution(f1)[36,]# look at correlation F1 and F2
+```
+The naive and much simpler approach  is to use *sum/mean scores*
+```{r}
+s1 <- rowMeans(mydata[, 1:3], na.rm=T)
+s2 <- rowMeans(mydata[, 4:6], na.rm=T)
+plot(s1, s2)
+cor(s1,s2)
+```
+The association is *attenuated* using naiv sum scores!
+
+## Goodness-of-fit: How well does the model fit the data?
+
+The strict test for model fit is the chi-square test. The null hypothesis: The model is correctly specified. The alternative hypothesis: The model is misspecified!
+
+```{r}
+fitmeasures(f1, c("chisq", "pvalue", "df"))
+```
+pvalue is just the upper tail in a chi-square distribution
+```{r}
+pchisq(62.56, df = 80, lower.tail = FALSE)
+```
+
+
+The null is not rejected! A very well-fitting model (totally unrealistic)
+
+
+## Degrees of freedom in latent variable models 
+
+Degrees: The number of variances and covariances among the 15 observed indicators, minus the number of free model parameters. 
+
+- There are 15*16/2=120 variances/covariances
+- There are 2*5 factor loadings, 15 residual variances, and 5*6/2=15 latent variances/covariances. 
+- Total number of free parameters is 10+15+15=40
+- DF = 120-40=80
+
+## The p-value
+
+```{r, echo=F, fig.height=5}
+df <- 80
+x0 <- 62.56
+
+# usual chi-square test p-value (upper tail)
+p <- pchisq(x0, df = df, lower.tail = FALSE)
+# 0.8639849
+
+# plot density
+xmax <- qchisq(0.999, df)         # nice right limit for the curve
+xs <- seq(0, xmax, length.out = 2000)
+
+plot(xs, dchisq(xs, df),
+     type = "l", lwd = 2,
+     xlab = expression(chi^2), ylab = "Density",
+     main = bquote(chi^2~"density ("*df==.(df)*")"))
+
+abline(v = x0, lwd = 2, col = "red")
+
+# shade upper tail area
+xs_tail <- xs[xs >= x0]
+polygon(c(x0, xs_tail, max(xs_tail)),
+        c(0, dchisq(xs_tail, df), 0),
+        col = adjustcolor("red", alpha.f = 0.25),
+        border = NA)
+
+legend("topright",
+       legend = c(sprintf("x = %.1f", x0),
+                  sprintf("p (upper tail) = %.4f", p)),
+       bty = "n")
+
+```
+
+## What to do with non-normal data?
+
+- Data is seldom normal (either skewed, or ordinal in nature- Likert data).
+
+- We then need a scaled chi-square test, and robust standard errors. The classical way is to use "MLM" estimator. Gives robust standard errors and a scaled Satorra-Bentler statistic. 
+
+Exercises:
+
+- Download and open the dataset bigfive_nonnormal.cvs
+- check skewness and kurtosis on the marginals using psych::skew, and psych::kurtosi
+- Estimate the model using estimator="MLM" in *cfa()* function
+
+## Recent findings concerning the chi-square test: Normal data
+
+Normal data: The default in mplus and lavaan is the ML chi-square. A much better fit statistic is Brownes residual-based statistic. See *Foldnes, N., Moss, J., & Grønneberg, S. (2025). Improved Goodness of Fit Procedures for Structural Equation Models. Structural Equation Modeling*. Available in package semTests: 
+```{r}
+semTests::pvalues(f1, tests=c("std_rls"))
+```
+
+## Recent findings concerning the chi-square test: Non-normal data
+
+- Non-normal data. The much used Satorra-Bentler test is outperformed by newer test statistics available in package semTests
+
+
+```{r}
+library(semTests)
+skeweddata <- read.csv("../data/bigfive_nonnormal.csv")
+f <- cfa(model, skeweddata, estimator="MLM")
+fitmeasures(f, "pvalue.robust")
+semTests::pvalues(f1)#peba4_rls is the overall winner in an upcoming BRM paper!
+```
+## A real-world dataset
+
+More often than not, the chi-square test will reject the model. 
+
+A real-world dataset: *bfi* in psych package
+```{r}
+f <- cfa("E=~E1+E2+E3+E4+E5", bfi, estimator="MLM")
+fitmeasures(f, c("chisq", "pvalue", "df"))
+```
+Clearly, the model is misspecified! But can it still be used?
+
+
+## Fit indices 
+
+Then we have "tests" of "approximate fit". These are fit indices and are not statistically motivated, but involve "rules of thumb". Papers typically cite Hu&Bentler 1999 or some textbook for cutoffs.
+
+-RMSEA (should be below .08? or .05?)
+-CFI
+-SRMR 
+
+```{r}
+fitmeasures(f, c("rmsea.robust", "cfi.robust", "srmr"))
+```
+
+
+
+## What about Likert data (this is the most frequent type of dataset)
+
+Let us discretize the data into 1-5 scale Likert data
+
+
+```{r}
+likert <- sapply(mydata, cut, breaks=c(-Inf, -1, -.5, 0, 1, Inf), labels=F) #chop into discrete values
+likert <- data.frame(likert)
+head(likert)
+```
+
+## Option 1: Treating data as continuous
+
+```{r}
+fcont <- cfa(model, likert, estimator="MLM")#needed for Likert data
+summary(fcont)
+```
+
+## Option 2: Treating data as ordinal
+
+```{r}
+ford <- cfa(model, likert, ordered=TRUE)#needed for Likert data
+summary(ford)
+```
+
+## which is the best option?
+
+- Likert scale data is a very hard challenge to CFA/SEM. 
+
+- If the underlying distribution which has been discretized is multivariate normal, then ordered=TRUE should be used. 
+- But this rarely holds, as *discnorm::bootTest()* will show. 
+- The best thing is to do both ways, and hope that the substantive conclusions are similar
+- If many indicators, one option is to *parcel*: make sum scores of subsets of indicators and use these as indicators. Often done in big-five research 
+ 
+
+*Foldnes, N., & Grønneberg, S. (2022). The sensitivity of structural equation modeling with ordinal data to underlying non-normality and observed distributional forms. Psychological Methods*
+
+
+
+
+
+## Exercises 
+
+1.  find the correlation between F2 and F5 in the CFA. And what is the correlation using mean scores for F2 and F5? Is the mean score correlation attenuated wrt the factor correlation?
+
+2. A smaller model is considered: It contains F1 F2 and F3 (9 indicators). Try to calculate the number of covariances and variances in the 9 indicators. And calculate the number of free parameters. What is the df?
+
+3. Verify your df calculations by running the F1-F2-F3 model in lavaan. 
+
+
+

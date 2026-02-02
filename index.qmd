@@ -4,7 +4,12 @@ author: "Njål Foldnes, National Reading Centre, UiS"
 tbl-colwidths: [10,30,10,10,10]
 ---
 
-# Growth modeling in R and more
+# R basics
+
+[📖](slides/r_intro.qmd) Introduction to R and various tools for productivity
+
+
+# Growth modeling in R
 
 [📖](slides/growth_intro.qmd) Introduction to growth modeling in R
 
