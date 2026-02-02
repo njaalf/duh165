@@ -20,7 +20,7 @@ p <- ggplot(ll, aes(name, value, group=id, color=factor(id)))+
   xlab(NULL)+ylab(NULL)
 
 p.sticker <- sticker(
-  p, package="FREDAG DUH165", 
+  p, package="DAG 2 DUH165", 
   filename="images/icon.png",s_width = 2,
   s_height = 1.4, s_y=1, s_x=1
 )
