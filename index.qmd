@@ -1,5 +1,5 @@
 ---
-title: "Duh 165 Applied statistics - Day 5"
+title: "Duh 165 Applied statistics - Day 2"
 author: "Njål Foldnes, National Reading Centre, UiS"
 tbl-colwidths: [10,30,10,10,10]
 ---
