@@ -487,7 +487,7 @@
     "href": "slides/r_intro.html#recent-findings-concerning-the-chi-square-test-non-normal-data",
     "title": "Part 1: R, Rstudio and other tools",
     "section": "Recent findings concerning the chi-square test: Non-normal data",
-    "text": "Recent findings concerning the chi-square test: Non-normal data\n\nNon-normal data. The much used Satorra-Bentler test is outperformed by newer test statistics available in package semTests\n\n\nlibrary(semTests)\nskeweddata &lt;- read.csv(\"../data/bigfive_nonnormal.csv\")\nf &lt;- cfa(model, skeweddata, estimator=\"MLM\")\nfitmeasures(f, \"pvalue.robust\")\n\nnumeric(0)\n\nsemTests::pvalues(f1)#peba4_rls is the overall winner in an upcoming BRM paper!\n\npeba4_rls \n0.9185683"
+    "text": "Recent findings concerning the chi-square test: Non-normal data\n\nNon-normal data. The much used Satorra-Bentler test is outperformed by newer test statistics available in package semTests\n\n\nlibrary(semTests)\nskeweddata &lt;- read.csv(\"../data/bigfive_nonnormal.csv\")\nf &lt;- cfa(model, skeweddata, estimator=\"MLM\")\nfitmeasures(f, \"pvalue.scaled\")\n\npvalue.scaled \n        0.489 \n\nsemTests::pvalues(f)#peba4_rls is the preferred test statistic for non-normality\n\npeba4_rls \n0.4855208"
   },
   {
     "objectID": "slides/r_intro.html#a-real-world-dataset",

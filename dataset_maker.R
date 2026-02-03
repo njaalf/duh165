@@ -33,6 +33,6 @@ mydata <- dat_missing
 set.seed(123)
 dat <- simulateData(popmodel, sample.nobs=500, skewness=3, kurtosis=21, std.lv=T)
 f <- cfa(model, dat, estimator="MLM")
-write.csv(dat_missing, "data/bigfive_nonnormal.csv", row.names=F)
+write.csv(dat, "data/bigfive_nonnormal.csv", row.names=F)
 mydata <- dat_missing
 

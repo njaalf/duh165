@@ -238,8 +238,8 @@ semTests::pvalues(f1, tests=c("std_rls"))
 library(semTests)
 skeweddata <- read.csv("../data/bigfive_nonnormal.csv")
 f <- cfa(model, skeweddata, estimator="MLM")
-fitmeasures(f, "pvalue.robust")
-semTests::pvalues(f1)#peba4_rls is the overall winner in an upcoming BRM paper!
+fitmeasures(f, "pvalue.scaled")
+semTests::pvalues(f)#peba4_rls is the preferred test statistic for non-normality
 ```
 ## A real-world dataset
 
